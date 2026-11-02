@@ -3,9 +3,14 @@ import assert from "node:assert/strict";
 import {
   AIRPORTS,
   buildGroups,
+  DEFAULT_POLICY,
+  DESNZ_2026,
   canonicalCountry,
   emissionsForLeg,
   guessAirport,
+  haulFor,
+  haversineKm,
+  flightHours,
   parseCsv,
   parsePeople,
   scoreAll,
@@ -138,15 +143,62 @@ test("buildGroups counts skipped rows but not blank ones", () => {
 });
 
 test("return trips double the one-way figure", () => {
-  const policy = { threshold: 6, economyFactor: 0.1, businessMultiplier: 2, nonCo2Multiplier: 1 };
+  const policy = { ...DEFAULT_POLICY, nonCo2Multiplier: 1 };
   const oneWay = emissionsForLeg(1000, 2, 10, { ...policy, returnTrip: false });
   const twoWay = emissionsForLeg(1000, 2, 10, { ...policy, returnTrip: true });
-  assert.equal(oneWay, 1000);
+  assert.ok(Math.abs(oneWay - 1000 * 1.08 * 10 * 0.068) < 1e-9);
   assert.equal(twoWay, 2 * oneWay);
+  assert.equal(emissionsForLeg(1000, 2, 10, { ...policy, returnTrip: undefined }), twoWay);
+});
+
+test("haulFor splits domestic, short-haul and long-haul by distance", () => {
+  assert.equal(haulFor(0), "domestic");
+  assert.equal(haulFor(499), "domestic");
+  assert.equal(haulFor(500), "shortHaul");
+  assert.equal(haulFor(3699), "shortHaul");
+  assert.equal(haulFor(3700), "longHaul");
+  assert.equal(haulFor(15000), "longHaul");
+});
+
+test("DESNZ 2026 defaults are the published figures", () => {
+  assert.equal(DESNZ_2026.nonCo2Multiplier, 1.7);
+  assert.equal(DESNZ_2026.distanceUplift, 1.08);
+  assert.deepEqual(DEFAULT_POLICY.factors, DESNZ_2026.factorsKgPerPkm);
+  assert.equal(DEFAULT_POLICY.nonCo2Multiplier, 1.7);
+  assert.notEqual(DEFAULT_POLICY.factors.shortHaul, DESNZ_2026.factorsKgPerPkm.shortHaul);
+});
+
+test("emissionsForLeg picks the right factor for each flight type and cabin", () => {
+  const f = DESNZ_2026.factorsKgPerPkm;
+  const p = { ...DEFAULT_POLICY, nonCo2Multiplier: 1, returnTrip: false };
+  const run = (km, hours) => emissionsForLeg(km, hours, 1, p) / (km * 1.08);
+  // Domestic ignores the cabin, even above the threshold.
+  assert.equal(run(300, 1), f.domestic);
+  assert.equal(run(300, 9), f.domestic);
+  assert.equal(run(2000, 3), f.shortHaul.economy);
+  assert.equal(run(2000, 7), f.shortHaul.business);
+  assert.equal(run(8000, 6), f.longHaul.economy); // exactly on the threshold stays economy
+  assert.equal(run(8000, 6.01), f.longHaul.business);
+});
+
+test("distance uplift, non-CO2 multiplier and people all scale the result", () => {
+  const base = { ...DEFAULT_POLICY, nonCo2Multiplier: 1, distanceUplift: 1, returnTrip: false };
+  const one = emissionsForLeg(2000, 3, 1, base);
+  assert.ok(Math.abs(emissionsForLeg(2000, 3, 1, { ...base, distanceUplift: 1.08 }) - one * 1.08) < 1e-9);
+  assert.ok(Math.abs(emissionsForLeg(2000, 3, 1, { ...base, nonCo2Multiplier: 1.7 }) - one * 1.7) < 1e-9);
+  assert.ok(Math.abs(emissionsForLeg(2000, 3, 25, base) - one * 25) < 1e-9);
+});
+
+test("worked example: London to New York, economy, one way, no non-CO2 uplift", () => {
+  const gcd = haversineKm(airportByCode("LHR"), airportByCode("JFK"));
+  assert.ok(gcd > 5400 && gcd < 5700);
+  const policy = { ...DEFAULT_POLICY, nonCo2Multiplier: 1, returnTrip: false, threshold: 14 };
+  const kg = emissionsForLeg(gcd, flightHours(gcd), 1, policy);
+  assert.ok(Math.abs(kg - gcd * 1.08 * 0.0632) < 1e-9);
 });
 
 test("unplaced groups are excluded from totals", () => {
-  const policy = { threshold: 6, economyFactor: 0.115, businessMultiplier: 2.8, nonCo2Multiplier: 1, returnTrip: true };
+  const policy = { ...DEFAULT_POLICY, nonCo2Multiplier: 1 };
   const placed = [{ people: 10, airportCode: "LHR" }];
   const withUnplaced = [...placed, { people: 500, airportCode: null }];
   const a = scoreAll(placed, policy);
@@ -165,7 +217,7 @@ test("tzDifference wraps around the date line", () => {
   assert.equal(tzDifference(0, 0), 0);
 });
 
-const POLICY = { threshold: 6, economyFactor: 0.115, businessMultiplier: 2.8, nonCo2Multiplier: 1, returnTrip: true };
+const POLICY = { ...DEFAULT_POLICY, nonCo2Multiplier: 1 };
 
 test("scoreDestination reports severe jetlag and business class shares", () => {
   // To London: Delhi is a 5.5 h shift (not severe), Sydney 10 h (severe). Both fly over 6 h.

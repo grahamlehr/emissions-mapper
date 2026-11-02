@@ -1,76 +1,18 @@
+import {
+  AIRPORTS,
+  SAMPLE_ROWS,
+  buildGroups,
+  normalizeImportedRow,
+  normalize,
+  parseCsv,
+  scoreAll
+} from "./model.js";
+
 // Heat and marker colours, lowest to highest emissions. These mirror Signal's tokens
 // (green-500, amber-500, red-500, red-800); Leaflet needs literal colours, so they live here.
 // Keep the legend swatches in src/styles.css in step.
 const DATA_COLOURS = ["#1fe070", "#ffb000", "#ff3b1f", "#8f1a08"];
 
-const AIRPORTS = [
-  { code: "ATL", city: "Atlanta", country: "United States", lat: 33.64, lon: -84.43, tz: -5 },
-  { code: "JFK", city: "New York", country: "United States", lat: 40.64, lon: -73.78, tz: -5 },
-  { code: "LAX", city: "Los Angeles", country: "United States", lat: 33.94, lon: -118.41, tz: -8 },
-  { code: "ORD", city: "Chicago", country: "United States", lat: 41.98, lon: -87.91, tz: -6 },
-  { code: "YYZ", city: "Toronto", country: "Canada", lat: 43.68, lon: -79.63, tz: -5 },
-  { code: "MEX", city: "Mexico City", country: "Mexico", lat: 19.44, lon: -99.07, tz: -6 },
-  { code: "GRU", city: "Sao Paulo", country: "Brazil", lat: -23.43, lon: -46.47, tz: -3 },
-  { code: "EZE", city: "Buenos Aires", country: "Argentina", lat: -34.82, lon: -58.54, tz: -3 },
-  { code: "SCL", city: "Santiago", country: "Chile", lat: -33.39, lon: -70.79, tz: -4 },
-  { code: "BOG", city: "Bogota", country: "Colombia", lat: 4.7, lon: -74.15, tz: -5 },
-  { code: "LHR", city: "London", country: "United Kingdom", lat: 51.47, lon: -0.45, tz: 0 },
-  { code: "CDG", city: "Paris", country: "France", lat: 49.01, lon: 2.55, tz: 1 },
-  { code: "AMS", city: "Amsterdam", country: "Netherlands", lat: 52.31, lon: 4.76, tz: 1 },
-  { code: "FRA", city: "Frankfurt", country: "Germany", lat: 50.04, lon: 8.56, tz: 1 },
-  { code: "MAD", city: "Madrid", country: "Spain", lat: 40.49, lon: -3.57, tz: 1 },
-  { code: "FCO", city: "Rome", country: "Italy", lat: 41.8, lon: 12.25, tz: 1 },
-  { code: "ZRH", city: "Zurich", country: "Switzerland", lat: 47.46, lon: 8.55, tz: 1 },
-  { code: "CPH", city: "Copenhagen", country: "Denmark", lat: 55.62, lon: 12.65, tz: 1 },
-  { code: "ARN", city: "Stockholm", country: "Sweden", lat: 59.65, lon: 17.92, tz: 1 },
-  { code: "HEL", city: "Helsinki", country: "Finland", lat: 60.32, lon: 24.97, tz: 2 },
-  { code: "DUB", city: "Dublin", country: "Ireland", lat: 53.43, lon: -6.25, tz: 0 },
-  { code: "IST", city: "Istanbul", country: "Turkey", lat: 41.28, lon: 28.75, tz: 3 },
-  { code: "DXB", city: "Dubai", country: "United Arab Emirates", lat: 25.25, lon: 55.36, tz: 4 },
-  { code: "DOH", city: "Doha", country: "Qatar", lat: 25.27, lon: 51.61, tz: 3 },
-  { code: "CAI", city: "Cairo", country: "Egypt", lat: 30.12, lon: 31.41, tz: 2 },
-  { code: "JNB", city: "Johannesburg", country: "South Africa", lat: -26.14, lon: 28.25, tz: 2 },
-  { code: "LOS", city: "Lagos", country: "Nigeria", lat: 6.58, lon: 3.32, tz: 1 },
-  { code: "NBO", city: "Nairobi", country: "Kenya", lat: -1.32, lon: 36.93, tz: 3 },
-  { code: "DEL", city: "Delhi", country: "India", lat: 28.56, lon: 77.1, tz: 5.5 },
-  { code: "BOM", city: "Mumbai", country: "India", lat: 19.09, lon: 72.87, tz: 5.5 },
-  { code: "BKK", city: "Bangkok", country: "Thailand", lat: 13.69, lon: 100.75, tz: 7 },
-  { code: "SIN", city: "Singapore", country: "Singapore", lat: 1.36, lon: 103.99, tz: 8 },
-  { code: "HKG", city: "Hong Kong", country: "Hong Kong", lat: 22.31, lon: 113.92, tz: 8 },
-  { code: "PVG", city: "Shanghai", country: "China", lat: 31.14, lon: 121.81, tz: 8 },
-  { code: "PEK", city: "Beijing", country: "China", lat: 40.08, lon: 116.58, tz: 8 },
-  { code: "HND", city: "Tokyo", country: "Japan", lat: 35.55, lon: 139.78, tz: 9 },
-  { code: "ICN", city: "Seoul", country: "South Korea", lat: 37.46, lon: 126.44, tz: 9 },
-  { code: "SYD", city: "Sydney", country: "Australia", lat: -33.94, lon: 151.18, tz: 10 },
-  { code: "MEL", city: "Melbourne", country: "Australia", lat: -37.67, lon: 144.84, tz: 10 },
-  { code: "AKL", city: "Auckland", country: "New Zealand", lat: -37.01, lon: 174.79, tz: 12 }
-];
-
-const COUNTRY_ALIASES = new Map([
-  ["usa", "United States"],
-  ["us", "United States"],
-  ["u.s.", "United States"],
-  ["united states of america", "United States"],
-  ["uk", "United Kingdom"],
-  ["u.k.", "United Kingdom"],
-  ["great britain", "United Kingdom"],
-  ["england", "United Kingdom"],
-  ["uae", "United Arab Emirates"],
-  ["united arab emirates", "United Arab Emirates"],
-  ["south korea", "South Korea"],
-  ["korea", "South Korea"],
-  ["new zealand", "New Zealand"],
-  ["hong kong", "Hong Kong"]
-]);
-
-const SAMPLE_ROWS = [
-  { location: "London", country: "United Kingdom", people: 42 },
-  { location: "New York", country: "United States", people: 18 },
-  { location: "Singapore", country: "Singapore", people: 9 },
-  { location: "Delhi", country: "India", people: 14 },
-  { location: "Sydney", country: "Australia", people: 7 },
-  { location: "Sao Paulo", country: "Brazil", people: 11 }
-];
 
 const state = {
   groups: [],
@@ -101,11 +43,13 @@ const els = {
   economyFactor: document.querySelector("#economyFactor"),
   businessMultiplier: document.querySelector("#businessMultiplier"),
   nonCo2: document.querySelector("#nonCo2Toggle"),
+  returnTrip: document.querySelector("#returnTripToggle"),
   groupCount: document.querySelector("#groupCount"),
   peopleCount: document.querySelector("#peopleCount"),
   bestCity: document.querySelector("#bestCity"),
   bestEmissions: document.querySelector("#bestEmissions"),
   jetlagShare: document.querySelector("#jetlagShare"),
+  notices: [...document.querySelectorAll("[data-notice]")],
   reviewList: document.querySelector("#reviewList"),
   map: document.querySelector("#worldMap"),
   selectedName: document.querySelector("#selectedName"),
@@ -114,162 +58,30 @@ const els = {
   selectedFlight: document.querySelector("#selectedFlight"),
   selectedJetlag: document.querySelector("#selectedJetlag"),
   topDrivers: document.querySelector("#topDrivers"),
+  heatToggle: document.querySelector("#heatToggle"),
   jetlagToggle: document.querySelector("#jetlagToggle"),
   routesToggle: document.querySelector("#routesToggle")
 };
-
-function normalize(text) {
-  return String(text || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function canonicalCountry(value) {
-  const key = normalize(value);
-  if (!key) return "";
-  return COUNTRY_ALIASES.get(key) || titleCase(key);
-}
-
-function titleCase(value) {
-  return String(value)
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function airportLabel(airport) {
-  return `${airport.city} (${airport.code})`;
-}
 
 function getPolicy() {
   return {
     threshold: Number(els.threshold.value),
     economyFactor: Number(els.economyFactor.value) || 0.115,
     businessMultiplier: Number(els.businessMultiplier.value) || 2.8,
-    nonCo2Multiplier: els.nonCo2.checked ? 1.9 : 1
+    nonCo2Multiplier: els.nonCo2.checked ? 1.9 : 1,
+    returnTrip: els.returnTrip.checked
   };
 }
 
-function guessAirport(row) {
-  const explicit = String(row.airport || row.iata || "").trim().toUpperCase();
-  if (explicit) {
-    const match = AIRPORTS.find((airport) => airport.code === explicit);
-    if (match) return { airport: match, confidence: "high", reason: "airport code" };
-  }
-
-  const location = normalize(row.location || row.city || row.place || "");
-  const country = canonicalCountry(row.country || "");
-  const combined = normalize(`${row.location || ""} ${row.country || ""}`);
-
-  const cityMatch = AIRPORTS.find((airport) => {
-    const city = normalize(airport.city);
-    return city && (location === city || combined.includes(city));
-  });
-  if (cityMatch) return { airport: cityMatch, confidence: "high", reason: "city match" };
-
-  const countryMatch = AIRPORTS.find((airport) => normalize(airport.country) === normalize(country || row.location));
-  if (countryMatch) return { airport: countryMatch, confidence: "medium", reason: "country default" };
-
-  const locationCountryMatch = AIRPORTS.find((airport) => normalize(airport.country) === location);
-  if (locationCountryMatch) return { airport: locationCountryMatch, confidence: "medium", reason: "country default" };
-
-  return { airport: AIRPORTS.find((airport) => airport.code === "LHR"), confidence: "low", reason: "fallback" };
+function placedGroups() {
+  return state.groups.filter((group) => group.airportCode);
 }
 
-function buildGroups(rows) {
-  return rows
-    .map((row, index) => {
-      const people = Number(row.people || row.attendees || row.count || row.number || 0);
-      if (!Number.isFinite(people) || people <= 0) return null;
-      const guess = guessAirport(row);
-      return {
-        id: `group-${Date.now()}-${index}`,
-        inputLocation: row.location || row.city || row.country || row.airport || "Unknown",
-        country: canonicalCountry(row.country || ""),
-        people,
-        airportCode: guess.airport.code,
-        confidence: guess.confidence,
-        reason: guess.reason
-      };
-    })
-    .filter(Boolean);
-}
-
-function airportByCode(code) {
-  return AIRPORTS.find((airport) => airport.code === code) || AIRPORTS[0];
-}
-
-function haversineKm(a, b) {
-  const toRad = (degrees) => (degrees * Math.PI) / 180;
-  const radius = 6371;
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-  return radius * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
-
-function flightHours(distanceKm) {
-  return distanceKm / 850 + 0.55;
-}
-
-function tzDifference(a, b) {
-  const raw = Math.abs(a - b);
-  return Math.min(raw, 24 - raw);
-}
-
-function emissionsForLeg(distanceKm, hours, people, policy) {
-  const cabinMultiplier = hours > policy.threshold ? policy.businessMultiplier : 1;
-  return distanceKm * people * policy.economyFactor * cabinMultiplier * policy.nonCo2Multiplier;
-}
-
-function scoreDestination(destination, policy) {
-  let totalEmissionsKg = 0;
-  let totalPeople = 0;
-  let weightedHours = 0;
-  let weightedJetlag = 0;
-  let businessClassPeople = 0;
-  const drivers = [];
-
-  for (const group of state.groups) {
-    const origin = airportByCode(group.airportCode);
-    const distanceKm = haversineKm(origin, destination);
-    const hours = flightHours(distanceKm);
-    const emissionsKg = emissionsForLeg(distanceKm, hours, group.people, policy);
-    const jetlag = tzDifference(origin.tz, destination.tz);
-    totalEmissionsKg += emissionsKg;
-    totalPeople += group.people;
-    weightedHours += hours * group.people;
-    weightedJetlag += jetlag * group.people;
-    if (hours > policy.threshold) businessClassPeople += group.people;
-    drivers.push({ origin, people: group.people, emissionsKg, hours, jetlag });
-  }
-
-  drivers.sort((a, b) => b.emissionsKg - a.emissionsKg);
-  return {
-    destination,
-    totalEmissionsKg,
-    totalPeople,
-    averageEmissionsKg: totalPeople ? totalEmissionsKg / totalPeople : 0,
-    averageHours: totalPeople ? weightedHours / totalPeople : 0,
-    jetlagScore: totalPeople ? weightedJetlag / totalPeople : 0,
-    businessClassPeople,
-    drivers
-  };
-}
-
+// With nothing placed there is nothing to rank, so the scores stay empty.
 function calculateScores() {
-  const policy = getPolicy();
-  state.scores = AIRPORTS.map((airport) => scoreDestination(airport, policy));
-  state.scores.sort((a, b) => a.totalEmissionsKg - b.totalEmissionsKg);
-  if (!state.scores.some((score) => score.destination.code === state.selectedCode)) {
-    state.selectedCode = state.scores[0]?.destination.code || "AMS";
+  state.scores = placedGroups().length ? scoreAll(state.groups, getPolicy()) : [];
+  if (state.scores.length && !state.scores.some((score) => score.destination.code === state.selectedCode)) {
+    state.selectedCode = state.scores[0].destination.code;
   }
 }
 
@@ -324,12 +136,63 @@ function initMap() {
   requestAnimationFrame(() => state.map.invalidateSize());
 }
 
+
 const CONFIDENCE_TAGS = {
-  high: "sg-tag sg-tag--muted",
-  medium: "sg-tag sg-tag--warning",
-  low: "sg-tag sg-tag--danger"
+  unplaced: { className: "sg-tag sg-tag--danger", label: "not placed" },
+  medium: { className: "sg-tag sg-tag--warning", label: "country only" },
+  high: { className: "sg-tag sg-tag--muted", label: "matched" },
+  manual: { className: "sg-tag sg-tag--muted", label: "chosen" }
 };
 
+const CONFIDENCE_ORDER = { unplaced: 0, medium: 1, high: 2, manual: 2 };
+
+const AIRPORT_OPTIONS = [...AIRPORTS]
+  .sort((a, b) => a.city.localeCompare(b.city))
+  .map((airport) => `<option value="${airport.code}">${airport.city}, ${airport.country} (${airport.code})</option>`)
+  .join("");
+
+function applyConfidenceTag(tag, confidence) {
+  const info = CONFIDENCE_TAGS[confidence] || CONFIDENCE_TAGS.high;
+  tag.className = info.className;
+  tag.textContent = info.label;
+}
+
+function plural(count, one, many) {
+  return `${count} ${count === 1 ? one : many}`;
+}
+
+// Warns about groups that are missing from the totals (not placed) or only roughly placed.
+function renderNotices() {
+  const unplaced = state.groups.filter((group) => !group.airportCode);
+  const countryOnly = state.groups.filter((group) => group.airportCode && group.confidence === "medium");
+  const parts = [];
+  if (unplaced.length) {
+    const people = unplaced.reduce((sum, group) => sum + group.people, 0);
+    parts.push({
+      level: "danger",
+      text: `${unplaced.length} of ${plural(state.groups.length, "group", "groups")} couldn't be placed (${plural(people, "person", "people")}). They're left out of the totals until you pick an airport.`
+    });
+  }
+  if (countryOnly.length) {
+    parts.push({
+      level: "warning",
+      text: `${plural(countryOnly.length, "group was", "groups were")} placed by country only, check ${countryOnly.length === 1 ? "it" : "them"}.`
+    });
+  }
+  for (const element of els.notices) {
+    element.replaceChildren();
+    element.hidden = !parts.length;
+    for (const part of parts) {
+      const paragraph = document.createElement("p");
+      paragraph.className = `notice notice--${part.level}`;
+      paragraph.textContent = part.text;
+      element.append(paragraph);
+    }
+  }
+}
+
+// Rebuilt only when new groups are loaded, never on a recalculation, so focus stays put while
+// someone works down the list.
 function renderReview() {
   els.reviewList.innerHTML = "";
   if (!state.groups.length) {
@@ -337,28 +200,33 @@ function renderReview() {
     return;
   }
 
-  for (const group of state.groups) {
+  const ordered = state.groups
+    .map((group, index) => ({ group, index }))
+    .sort((a, b) => CONFIDENCE_ORDER[a.group.confidence] - CONFIDENCE_ORDER[b.group.confidence] || a.index - b.index);
+
+  for (const { group } of ordered) {
     const row = document.createElement("article");
     row.className = "review-row";
-    const options = AIRPORTS.map((airport) => {
-      const selected = airport.code === group.airportCode ? "selected" : "";
-      return `<option value="${airport.code}" ${selected}>${airport.city}, ${airport.country} (${airport.code})</option>`;
-    }).join("");
-    const confidenceTag = CONFIDENCE_TAGS[group.confidence] || CONFIDENCE_TAGS.high;
     row.innerHTML = `
       <div class="review-head">
         <div class="review-place">
           <strong>${escapeHtml(group.inputLocation)}</strong>
-          <span class="review-people">${group.people} people</span>
+          <span class="review-people">${group.people.toLocaleString()} people</span>
         </div>
-        <span class="${confidenceTag}">${escapeHtml(group.confidence)}</span>
+        <span></span>
       </div>
-      <select class="sg-select" aria-label="Assumed airport for ${escapeHtml(group.inputLocation)}">${options}</select>
+      <select class="sg-select" aria-label="Assumed airport for ${escapeHtml(group.inputLocation)}">
+        ${group.airportCode ? "" : `<option value="">Choose an airport…</option>`}${AIRPORT_OPTIONS}
+      </select>
     `;
+    const tag = row.querySelector(".review-head > span:last-child");
     const select = row.querySelector("select");
+    select.value = group.airportCode || "";
+    applyConfidenceTag(tag, group.confidence);
     select.addEventListener("change", () => {
-      group.airportCode = select.value;
-      group.confidence = "high";
+      group.airportCode = select.value || null;
+      group.confidence = select.value ? "manual" : "unplaced";
+      applyConfidenceTag(tag, group.confidence);
       updateAll();
     });
     els.reviewList.append(row);
@@ -367,7 +235,14 @@ function renderReview() {
 
 function renderMap() {
   const scores = state.scores;
-  if (!scores.length || !state.mapReady) return;
+  if (!state.mapReady) return;
+  if (!scores.length) {
+    state.mapLayers.heat.clearLayers();
+    state.mapLayers.jetlag.clearLayers();
+    state.mapLayers.routes.clearLayers();
+    state.mapLayers.airports.clearLayers();
+    return;
+  }
   const min = Math.min(...scores.map((score) => score.totalEmissionsKg));
   const max = Math.max(...scores.map((score) => score.totalEmissionsKg));
 
@@ -514,7 +389,6 @@ function renderAirports(min, max) {
       markerElement.dataset.code = score.destination.code;
       markerElement.setAttribute("role", "button");
       markerElement.setAttribute("tabindex", "0");
-      markerElement.addEventListener("click", selectDestination);
       markerElement.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
@@ -529,9 +403,9 @@ function renderSummary() {
   const people = state.groups.reduce((sum, group) => sum + group.people, 0);
   const best = state.scores[0];
   const severe = state.scores.filter((score) => score.jetlagScore >= 6).length;
-  els.groupCount.textContent = `${state.groups.length} groups`;
+  els.groupCount.textContent = plural(state.groups.length, "group", "groups");
   els.peopleCount.textContent = people.toLocaleString();
-  els.bestCity.textContent = best ? `${best.destination.city}` : "-";
+  els.bestCity.textContent = best ? best.destination.city : "-";
   els.bestEmissions.textContent = best ? formatTonnes(best.totalEmissionsKg) : "-";
   els.jetlagShare.textContent = state.scores.length ? `${Math.round((severe / state.scores.length) * 100)}%` : "-";
 }
@@ -540,7 +414,14 @@ function renderSelected() {
   const selected =
     state.scores.find((score) => score.destination.code === state.selectedCode) ||
     state.scores[0];
-  if (!selected) return;
+  if (!selected) {
+    els.selectedName.textContent = "No groups placed yet";
+    for (const el of [els.selectedEmissions, els.selectedPerPerson, els.selectedFlight, els.selectedJetlag]) {
+      el.textContent = "-";
+    }
+    els.topDrivers.textContent = "Pick an airport for at least one group to see the ranking.";
+    return;
+  }
   state.selectedCode = selected.destination.code;
   els.selectedName.textContent = `${selected.destination.city}, ${selected.destination.country}`;
   els.selectedEmissions.textContent = formatTonnes(selected.totalEmissionsKg);
@@ -554,7 +435,8 @@ function renderSelected() {
     .slice(0, 3)
     .map((driver) => `${driver.origin.city}: ${formatTonnes(driver.emissionsKg)}`)
     .join(" / ");
-  els.topDrivers.textContent = `Top contributors: ${drivers || "-"}. Business class policy affects ${businessShare}% of attendees for this destination.`;
+  const trips = els.returnTrip.checked ? "return journeys" : "one-way journeys";
+  els.topDrivers.textContent = `Top contributors: ${drivers || "-"}. Figures are for ${trips}. Business class policy affects ${businessShare}% of attendees for this destination.`;
 }
 
 function updatePolicyCopy() {
@@ -566,60 +448,11 @@ function updatePolicyCopy() {
 function updateAll() {
   updatePolicyCopy();
   calculateScores();
-  renderReview();
+  renderNotices();
   renderSummary();
   if (state.mapReady) state.map.invalidateSize();
   renderMap();
   renderSelected();
-}
-
-function parseCsv(text) {
-  const rows = [];
-  const delimiter = text.includes("\t") ? "\t" : ",";
-  const lines = text.split(/\r?\n/).filter((line) => line.trim());
-  if (!lines.length) return rows;
-  const headers = splitRow(lines[0], delimiter).map((header) => normalize(header).replace(/\s+/g, ""));
-  for (const line of lines.slice(1)) {
-    const cells = splitRow(line, delimiter);
-    const row = {};
-    headers.forEach((header, index) => {
-      row[header] = cells[index] || "";
-    });
-    rows.push(normalizeImportedRow(row));
-  }
-  return rows;
-}
-
-function splitRow(line, delimiter) {
-  const cells = [];
-  let current = "";
-  let quoted = false;
-  for (let i = 0; i < line.length; i += 1) {
-    const char = line[i];
-    if (char === '"' && line[i + 1] === '"') {
-      current += '"';
-      i += 1;
-    } else if (char === '"') {
-      quoted = !quoted;
-    } else if (char === delimiter && !quoted) {
-      cells.push(current.trim());
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-  cells.push(current.trim());
-  return cells;
-}
-
-function normalizeImportedRow(row) {
-  const pick = (...keys) => keys.map((key) => row[key]).find((value) => value !== undefined && value !== "");
-  return {
-    location: pick("location", "city", "place", "origin", "attendeelocation"),
-    country: pick("country", "nation"),
-    people: pick("people", "attendees", "count", "number", "quantity"),
-    airport: pick("airport", "iata", "airportcode", "originairport")
-  };
 }
 
 async function parseFile(file) {
@@ -651,14 +484,24 @@ function escapeHtml(value) {
 }
 
 function setGroups(rows, sourceLabel) {
-  const groups = buildGroups(rows);
+  const { groups, skipped } = buildGroups(rows);
+  const skippedNote = skipped ? `, skipped ${plural(skipped, "row", "rows")} with no valid people count` : "";
   if (!groups.length) {
-    els.fileMessage.textContent = "No usable attendee rows found. Check for location and people columns.";
+    els.fileMessage.textContent = `No usable attendee rows found${skippedNote}. Check for location and people columns.`;
     return;
   }
   state.groups = groups;
-  els.fileMessage.textContent = `${sourceLabel}: loaded ${groups.length} attendee groups.`;
+  els.fileMessage.textContent = `${sourceLabel}: loaded ${groups.length} attendee groups${skippedNote}`;
+  renderReview();
   updateAll();
+}
+
+function debounce(fn, ms) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
 }
 
 function wireEvents() {
@@ -680,12 +523,16 @@ function wireEvents() {
     setGroups(SAMPLE_ROWS.map((row) => ({ ...row })), "Demo data reset");
   });
 
-  [els.threshold, els.economyFactor, els.businessMultiplier, els.nonCo2].forEach((input) => {
-    input.addEventListener("input", updateAll);
-    input.addEventListener("change", updateAll);
-  });
+  // Checkboxes and the range slider fire `input` as well, so `input` alone is enough.
+  const debouncedUpdate = debounce(updateAll, 150);
+  els.threshold.addEventListener("input", updateAll);
+  els.nonCo2.addEventListener("input", updateAll);
+  els.returnTrip.addEventListener("input", updateAll);
+  els.economyFactor.addEventListener("input", debouncedUpdate);
+  els.businessMultiplier.addEventListener("input", debouncedUpdate);
 
   [
+    [els.heatToggle, "heat"],
     [els.jetlagToggle, "jetlag"],
     [els.routesToggle, "routes"]
   ].forEach(([button, key]) => {

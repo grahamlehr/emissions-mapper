@@ -27,10 +27,13 @@
       crossorigin=""
       defer
     ></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous" defer></script>
     <script type="module" src="src/main.js"></script>
   </head>
   <body>
+    <noscript>
+      <p class="noscript-message">Flight emissions mapper needs JavaScript. Please enable it in your browser settings and reload the page.</p>
+    </noscript>
     <main class="app-shell">
       <aside class="control-panel" aria-label="Planning controls">
         <section class="brand-block">
@@ -100,6 +103,13 @@
               Multiplies flight CO2 by 1.9 to approximate wider aviation climate effects such as contrails, nitrogen oxides, and high-altitude impacts.
             </span>
           </div>
+          <div class="switch-row">
+            <label class="sg-switch">
+              <input type="checkbox" role="switch" id="returnTripToggle" checked />
+              <span class="sg-switch__track"></span>
+              <span>Return trips</span>
+            </label>
+          </div>
         </section>
 
         <section class="panel-section" aria-labelledby="summaryTitle">
@@ -108,6 +118,7 @@
             <h2 id="summaryTitle">Summary</h2>
             <span class="sg-tag sg-tag--muted" id="groupCount">0 groups</span>
           </header>
+          <div class="notices" data-notice hidden></div>
           <div class="metrics-grid">
             <div>
               <span class="sg-label">Total people</span>
@@ -134,6 +145,7 @@
             <h2 id="reviewTitle">Airport assumptions</h2>
             <span class="sg-tag sg-tag--muted">editable</span>
           </header>
+          <div class="notices" data-notice hidden></div>
           <div class="review-list" id="reviewList"></div>
         </section>
       </aside>
@@ -141,6 +153,7 @@
       <section class="map-stage" aria-label="World emissions map">
         <div class="map-toolbar">
           <div class="segmented" role="group" aria-label="Map layers">
+            <button id="heatToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Heat</button>
             <button id="jetlagToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Jetlag</button>
             <button id="routesToggle" class="sg-btn sg-btn--sm sg-btn--secondary" type="button" aria-pressed="false">Routes</button>
           </div>

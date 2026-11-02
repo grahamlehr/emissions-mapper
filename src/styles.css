@@ -732,3 +732,41 @@ input[type="range"]:focus-visible::-moz-range-thumb {
     padding: var(--space-4);
   }
 }
+
+/* ---------- Notices (unplaced and country-only groups) ---------- */
+
+.notices {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.notices[hidden] {
+  display: none;
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--neutral-400);
+  border-left-width: 4px;
+  font-size: var(--text-meta);
+  line-height: 1.4;
+  color: var(--fg-1, inherit);
+}
+
+.notice--danger {
+  border-left-color: var(--red-500, #ff3b1f);
+}
+
+.notice--warning {
+  border-left-color: var(--amber-500, #ffb000);
+}
+
+.noscript-message {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--neutral-400);
+}

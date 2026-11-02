@@ -9,6 +9,14 @@ The main problems are in the inputs, not the maths. Location matching is fragile
 
 Each finding was checked by running the app in a browser or calling the functions directly.
 
+## Status
+- **All 15 bugs and the housekeeping items are fixed.** Bugs 3, 8, 10 and 15 were fixed in the Signal restyle (PR 1). The rest were fixed on branch `claude/emissions-mapper-review-7e779c`. Also fixed: "1.200" (European thousands) is read as 1,200, and fractional headcounts are rejected.
+- **Product suggestion 1 is done.** Unplaced groups are shown in a banner, listed first and left out of the totals.
+- **Product suggestion 2 is partly done.** Matching is whole-word and checks the country first. The airport list grew from 40 to 90, with city aliases and one hub per country. Still to do: a bundled city gazetteer and nearest-airport lookup.
+- **Product suggestion 4 is partly done.** Return trips are the default, with a switch for one-way. Still to do: the method note and DEFRA short-haul and long-haul factors.
+- **The model is split out.** It lives in `src/model.js`, with tests in `tests/model.test.mjs`.
+- **New gap.** With 90 airports, labels collide more at world zoom (see suggestion 10).
+
 ## Bugs, most severe first
 
 | # | Severity | Where | Problem | Evidence |

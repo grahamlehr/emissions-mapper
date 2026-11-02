@@ -144,11 +144,33 @@ export const SAMPLE_ROWS = [
   { location: "Sao Paulo", country: "Brazil", people: 11 }
 ];
 
+// UK Government (DESNZ) conversion factors. Direct CO2 only, in kg per passenger-km, before the
+// distance and non-CO2 uplifts. The 500 km domestic cut-off is our own assumption (DESNZ's average
+// UK domestic flight is 434 km); the 3,700 km short-haul limit is DESNZ's earlier, simpler rule.
+export const DESNZ_2026 = {
+  source: "UK Government GHG conversion factors 2026 (DESNZ)",
+  url: "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2026",
+  published: "11 June 2026",
+  factorsKgPerPkm: {
+    domestic: 0.124,
+    shortHaul: { economy: 0.068, business: 0.102 },
+    longHaul: { economy: 0.0632, business: 0.1833 }
+  },
+  distanceUplift: 1.08,
+  nonCo2Multiplier: 1.7,
+  domesticMaxKm: 500,
+  shortHaulMaxKm: 3700
+};
+
 export const DEFAULT_POLICY = {
   threshold: 6,
-  economyFactor: 0.115,
-  businessMultiplier: 2.8,
-  nonCo2Multiplier: 1.9,
+  factors: {
+    domestic: DESNZ_2026.factorsKgPerPkm.domestic,
+    shortHaul: { ...DESNZ_2026.factorsKgPerPkm.shortHaul },
+    longHaul: { ...DESNZ_2026.factorsKgPerPkm.longHaul }
+  },
+  distanceUplift: DESNZ_2026.distanceUplift,
+  nonCo2Multiplier: DESNZ_2026.nonCo2Multiplier,
   returnTrip: true
 };
 
@@ -313,11 +335,22 @@ export function tzDifference(a, b) {
   return Math.min(raw, 24 - raw);
 }
 
-// Emissions for one group's travel. Return trips (the default) double the one-way figure.
+// Which DESNZ flight type a great-circle distance falls into.
+export function haulFor(distanceKm) {
+  if (distanceKm < DESNZ_2026.domesticMaxKm) return "domestic";
+  if (distanceKm < DESNZ_2026.shortHaulMaxKm) return "shortHaul";
+  return "longHaul";
+}
+
+// Emissions for one group's travel, from the great-circle distance. Business class applies when the
+// estimated flight time is over the policy threshold (domestic flights have a single factor).
+// Return trips (the default) double the one-way figure.
 export function emissionsForLeg(distanceKm, hours, people, policy) {
-  const cabinMultiplier = hours > policy.threshold ? policy.businessMultiplier : 1;
+  const haul = haulFor(distanceKm);
+  const cabin = hours > policy.threshold ? "business" : "economy";
+  const factor = haul === "domestic" ? policy.factors.domestic : policy.factors[haul][cabin];
   const trips = policy.returnTrip === false ? 1 : 2;
-  return distanceKm * people * policy.economyFactor * cabinMultiplier * policy.nonCo2Multiplier * trips;
+  return distanceKm * policy.distanceUplift * people * factor * policy.nonCo2Multiplier * trips;
 }
 
 // A time-zone shift of at least this many hours counts as severe jetlag.

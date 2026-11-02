@@ -1,5 +1,5 @@
 # Handoff
-_Updated 2026-11-02 · branch `feat/map-selection-labels` · PR not opened yet (public repo, needs Graham's OK)_
+_Updated 2026-11-02 · branch `feat/method-note` · PR not opened yet (public repo, needs Graham's OK)_
 
 ## Goal
 Publish the emissions mapper as a public GitHub Pages site, review it, restyle it in Signal, and fix the review's findings.
@@ -20,11 +20,13 @@ Publish the emissions mapper as a public GitHub Pages site, review it, restyle i
 
   Merged in PR 4.
 - Ranked comparison table (product suggestion 3), merged in PR 5 and live.
-- Pan to selection and label collisions (product suggestion 10) on `feat/map-selection-labels`. Verified locally at 1280px; the subagent also checked 375px.
+- Pan to selection and label collisions (product suggestion 10), merged in PR 6 and live.
+- DESNZ 2026 factors and a "How this is calculated" section (product suggestion 4) on `feat/method-note`. Verified locally at 1280px. The subagent also checked 375px and the factor editing.
 
 ## Next
-- Push `feat/map-selection-labels` and open its PR (needs Graham's OK: public repo).
-- Product backlog in `docs/REVIEW.md`. Suggested order: 4 (method note), 7 (export the table as CSV), 6.
+- Push `feat/method-note` and open its PR (needs Graham's OK: public repo).
+- Product backlog in `docs/REVIEW.md`. Suggested order: 7 (export the table as CSV), 6 (your own candidate cities), 5 (rail for short hops).
+- Refresh the factors when DESNZ publishes its 2027 set, around June 2027.
 
 ## Open decisions (need Graham)
 - Which product suggestions to build next, and in what order.
@@ -37,7 +39,7 @@ See `docs/DECISIONS.md`.
 - ES modules need the local server. `file://` won't work.
 
 ## State
-`main` is live on GitHub Pages, including the review fixes and the comparison table. `feat/map-selection-labels` is local only.
+`main` is live on GitHub Pages, including PRs 4 to 6. `feat/method-note` is local only.
 
 ## Prompt for the next session
 Read AGENTS.md, docs/DECISIONS.md and docs/REVIEW.md first, in /Users/graham/Projects/EmissionsMapper. Then build the next product suggestions from REVIEW.md.

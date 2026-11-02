@@ -71,16 +71,36 @@
             Assume business class over <strong id="policyText">6 hours</strong>
           </label>
           <input id="businessThreshold" type="range" min="2" max="14" step="1" value="6" />
-          <div class="policy-grid">
-            <div class="sg-field">
-              <label class="sg-label" for="economyFactor">kg CO2e per pax-km</label>
-              <input class="sg-input" id="economyFactor" type="number" min="0.01" max="1" step="0.005" value="0.115" />
+          <details class="factors-details" id="factorsDetails">
+            <summary>
+              <span>Emission factors (advanced)</span>
+              <span class="sg-tag sg-tag--accent" id="customTag" hidden>custom factors</span>
+            </summary>
+            <p class="sg-field__hint">Grams of CO2 per passenger-km. Blank or invalid values use the UK Government default.</p>
+            <div class="policy-grid">
+              <div class="sg-field">
+                <label class="sg-label" for="factorDomestic">Domestic (under 500 km)</label>
+                <input class="sg-input" id="factorDomestic" data-factor="domestic" type="number" min="0" max="1000" step="0.1" inputmode="decimal" />
+              </div>
+              <div class="sg-field">
+                <label class="sg-label" for="factorShortEconomy">Short-haul economy</label>
+                <input class="sg-input" id="factorShortEconomy" data-factor="shortHaul.economy" type="number" min="0" max="1000" step="0.1" inputmode="decimal" />
+              </div>
+              <div class="sg-field">
+                <label class="sg-label" for="factorShortBusiness">Short-haul business</label>
+                <input class="sg-input" id="factorShortBusiness" data-factor="shortHaul.business" type="number" min="0" max="1000" step="0.1" inputmode="decimal" />
+              </div>
+              <div class="sg-field">
+                <label class="sg-label" for="factorLongEconomy">Long-haul economy</label>
+                <input class="sg-input" id="factorLongEconomy" data-factor="longHaul.economy" type="number" min="0" max="1000" step="0.1" inputmode="decimal" />
+              </div>
+              <div class="sg-field">
+                <label class="sg-label" for="factorLongBusiness">Long-haul business</label>
+                <input class="sg-input" id="factorLongBusiness" data-factor="longHaul.business" type="number" min="0" max="1000" step="0.1" inputmode="decimal" />
+              </div>
             </div>
-            <div class="sg-field">
-              <label class="sg-label" for="businessMultiplier">Business multiplier</label>
-              <input class="sg-input" id="businessMultiplier" type="number" min="1" max="8" step="0.1" value="2.8" />
-            </div>
-          </div>
+            <button class="sg-btn sg-btn--sm sg-btn--secondary" id="resetFactors" type="button">Reset to DESNZ 2026</button>
+          </details>
           <div class="switch-row">
             <label class="sg-switch">
               <input type="checkbox" role="switch" id="nonCo2Toggle" checked />
@@ -100,7 +120,7 @@
               </svg>
             </button>
             <span class="popover" id="nonCo2Tooltip" role="tooltip">
-              Multiplies flight CO2 by 1.9 to approximate wider aviation climate effects such as contrails, nitrogen oxides, and high-altitude impacts.
+              Multiplies flight CO2 by 1.7, the UK Government's central estimate for the wider climate effect of contrails, nitrogen oxides and water vapour at altitude. The science here is uncertain, so treat it as a rough guide.
             </span>
           </div>
           <div class="switch-row">
@@ -147,6 +167,35 @@
           </header>
           <div class="notices" data-notice hidden></div>
           <div class="review-list" id="reviewList"></div>
+        </section>
+
+        <section class="panel-section method-section" aria-labelledby="methodTitle">
+          <header class="sg-section panel-head">
+            <span class="sg-index">05</span>
+            <h2 id="methodTitle">How this is calculated</h2>
+            <span class="sg-tag sg-tag--muted">DESNZ 2026</span>
+          </header>
+          <ol class="method-list">
+            <li><strong>Distance.</strong> The great-circle distance between the two airports, plus 8% for indirect routes and delays.</li>
+            <li><strong>Flight type.</strong> Under 500 km uses DESNZ's domestic factor (our cut-off, based on DESNZ's 434 km average UK domestic flight). Under 3,700 km is short-haul; anything longer is long-haul. DESNZ classes UK flights by region, but distance is used here so any pair of airports works.</li>
+            <li><strong>Cabin.</strong> Economy, or business when the estimated flight time is over your policy threshold. Flight time is estimated as distance &divide; 850 km/h + 0.55 h.</li>
+            <li>
+              <strong>Factors.</strong> Grams of CO2 per passenger-km:
+              <table class="sg-table method-table" id="methodFactors">
+                <thead><tr><th scope="col">Flight type</th><th scope="col" class="num">Economy</th><th scope="col" class="num">Business</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </li>
+            <li><strong>Non-CO2.</strong> <span id="methodNonCo2"></span></li>
+            <li><strong>Trips.</strong> <span id="methodTrips"></span></li>
+            <li><strong>Jetlag.</strong> Hours of time-zone difference using standard time. Daylight saving is ignored.</li>
+            <li><strong>Limits.</strong> Every journey is treated as one direct flight from the airport assigned to that group. Only CO2 is counted (methane and nitrous oxide are left out), so results are slightly lower than DESNZ's own CO2e figures. This is for comparing options, not for carbon reporting.</li>
+          </ol>
+          <p class="method-source">
+            Source:
+            <a href="https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2026" target="_blank" rel="noopener">UK Government GHG conversion factors 2026 (DESNZ)</a>,
+            published 11 June 2026. Methodology paper tables 36&ndash;37, paragraphs 8.37 and 8.42.
+          </p>
         </section>
       </aside>
 

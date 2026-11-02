@@ -1,6 +1,7 @@
 import { panPadding, pickVisibleLabels } from "./labels.js";
 import {
   AIRPORTS,
+  DESNZ_2026,
   SAMPLE_ROWS,
   buildGroups,
   normalizeImportedRow,
@@ -59,8 +60,12 @@ const els = {
   threshold: document.querySelector("#businessThreshold"),
   policyValue: document.querySelector("#policyValue"),
   policyText: document.querySelector("#policyText"),
-  economyFactor: document.querySelector("#economyFactor"),
-  businessMultiplier: document.querySelector("#businessMultiplier"),
+  factorInputs: [...document.querySelectorAll("[data-factor]")],
+  resetFactors: document.querySelector("#resetFactors"),
+  customTag: document.querySelector("#customTag"),
+  methodFactors: document.querySelector("#methodFactors tbody"),
+  methodNonCo2: document.querySelector("#methodNonCo2"),
+  methodTrips: document.querySelector("#methodTrips"),
   nonCo2: document.querySelector("#nonCo2Toggle"),
   returnTrip: document.querySelector("#returnTripToggle"),
   groupCount: document.querySelector("#groupCount"),
@@ -91,12 +96,53 @@ const els = {
   tableToggle: document.querySelector("#tableToggle")
 };
 
+// Factor inputs hold g CO2 per passenger-km and carry a path such as "shortHaul.economy".
+function factorPath(input) {
+  return input.dataset.factor.split(".");
+}
+
+function defaultFactorG(path) {
+  const kg = path.reduce((node, key) => node[key], DESNZ_2026.factorsKgPerPkm);
+  return Math.round(kg * 1e4) / 10; // kg to g, tidied of floating-point noise
+}
+
+// A blank, negative or non-numeric entry falls back to the DESNZ default for that field.
+function factorFromInput(input) {
+  const path = factorPath(input);
+  const raw = input.value.trim();
+  const grams = raw === "" ? NaN : Number(raw);
+  return Number.isFinite(grams) && grams >= 0 ? grams / 1000 : defaultFactorG(path) / 1000;
+}
+
+function readFactors() {
+  const factors = { domestic: 0, shortHaul: {}, longHaul: {} };
+  for (const input of els.factorInputs) {
+    const path = factorPath(input);
+    const value = factorFromInput(input);
+    if (path.length === 1) factors[path[0]] = value;
+    else factors[path[0]][path[1]] = value;
+  }
+  return factors;
+}
+
+function factorsAreCustom(factors) {
+  return els.factorInputs.some((input) => {
+    const path = factorPath(input);
+    const kg = path.reduce((node, key) => node[key], factors);
+    return Math.abs(kg * 1000 - defaultFactorG(path)) > 1e-9;
+  });
+}
+
+function fillFactorInputs() {
+  for (const input of els.factorInputs) input.value = String(defaultFactorG(factorPath(input)));
+}
+
 function getPolicy() {
   return {
     threshold: Number(els.threshold.value),
-    economyFactor: Number(els.economyFactor.value) || 0.115,
-    businessMultiplier: Number(els.businessMultiplier.value) || 2.8,
-    nonCo2Multiplier: els.nonCo2.checked ? 1.9 : 1,
+    factors: readFactors(),
+    distanceUplift: DESNZ_2026.distanceUplift,
+    nonCo2Multiplier: els.nonCo2.checked ? DESNZ_2026.nonCo2Multiplier : 1,
     returnTrip: els.returnTrip.checked
   };
 }
@@ -540,7 +586,7 @@ function renderTable() {
   const people = scores.length ? scores[0].totalPeople : 0;
   const hours = policy.threshold;
   els.tableMeta.textContent = scores.length
-    ? `${plural(people, "attendee", "attendees")} placed \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 non-CO2 uplift ${els.nonCo2.checked ? "on" : "off"}`
+    ? `${plural(people, "attendee", "attendees")} placed \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 ${els.nonCo2.checked ? `non-CO2 \u00d7${DESNZ_2026.nonCo2Multiplier}` : "non-CO2 off"}${factorsAreCustom(policy.factors) ? " \u00b7 custom factors" : ""}`
     : "";
 
   if (!scores.length) {
@@ -636,6 +682,30 @@ function updatePolicyCopy() {
   const value = Number(els.threshold.value);
   els.policyValue.textContent = `${value} h`;
   els.policyText.textContent = `${value} ${value === 1 ? "hour" : "hours"}`;
+  const policy = getPolicy();
+  els.customTag.hidden = !factorsAreCustom(policy.factors);
+  renderMethod(policy);
+}
+
+function formatGrams(kg) {
+  return (Math.round(kg * 1e4) / 10).toLocaleString("en-GB", { maximumFractionDigits: 1 });
+}
+
+// Keeps the "How this is calculated" note in step with the current policy.
+function renderMethod(policy) {
+  const f = policy.factors;
+  const cut = `${DESNZ_2026.domesticMaxKm.toLocaleString("en-GB")}`;
+  const short = `${DESNZ_2026.shortHaulMaxKm.toLocaleString("en-GB")}`;
+  els.methodFactors.innerHTML = `
+    <tr><th scope="row">Domestic (under ${cut} km)</th><td class="num" colspan="2">${formatGrams(f.domestic)}</td></tr>
+    <tr><th scope="row">Short-haul (under ${short} km)</th><td class="num">${formatGrams(f.shortHaul.economy)}</td><td class="num">${formatGrams(f.shortHaul.business)}</td></tr>
+    <tr><th scope="row">Long-haul</th><td class="num">${formatGrams(f.longHaul.economy)}</td><td class="num">${formatGrams(f.longHaul.business)}</td></tr>`;
+  els.methodNonCo2.textContent = els.nonCo2.checked
+    ? `Multiplied by ${DESNZ_2026.nonCo2Multiplier}, DESNZ's central estimate for contrails, nitrogen oxides and water vapour. It is uncertain.`
+    : "Switched off, so only direct CO2 is counted. When on, CO2 is multiplied by 1.7 (DESNZ's central estimate, which is uncertain).";
+  els.methodTrips.textContent = policy.returnTrip
+    ? "Return journeys count both ways (\u00d72). Switch off Return trips for one-way figures."
+    : "One-way journeys are counted. Switch on Return trips to count both ways (\u00d72).";
 }
 
 function updateAll() {
@@ -722,8 +792,11 @@ function wireEvents() {
   els.threshold.addEventListener("input", updateAll);
   els.nonCo2.addEventListener("input", updateAll);
   els.returnTrip.addEventListener("input", updateAll);
-  els.economyFactor.addEventListener("input", debouncedUpdate);
-  els.businessMultiplier.addEventListener("input", debouncedUpdate);
+  for (const input of els.factorInputs) input.addEventListener("input", debouncedUpdate);
+  els.resetFactors.addEventListener("click", () => {
+    fillFactorInputs();
+    updateAll();
+  });
 
   for (const tab of [els.mapTab, els.tableTab]) {
     tab.addEventListener("click", () => setView(tab === els.tableTab ? "table" : "map"));
@@ -783,6 +856,7 @@ function wireEvents() {
   });
 }
 
+fillFactorInputs();
 initMap();
 wireEvents();
 setGroups(SAMPLE_ROWS.map((row) => ({ ...row })), "Demo data");

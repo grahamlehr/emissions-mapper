@@ -243,6 +243,70 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   font-variant-numeric: tabular-nums;
 }
 
+/* Advanced emission factors: a plain disclosure, closed by default. */
+.factors-details {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  padding: var(--space-3) 0;
+}
+
+.factors-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+  font-weight: var(--weight-medium);
+  font-size: var(--text-small);
+}
+
+.factors-details summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.factors-details[open] summary {
+  margin-bottom: var(--space-2);
+}
+
+.factors-details .policy-grid + .sg-btn {
+  margin-top: var(--space-4);
+}
+
+/* How this is calculated */
+.method-list {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--fg-1);
+}
+
+.method-list li {
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-1);
+}
+
+.method-table {
+  margin-top: var(--space-2);
+}
+
+.method-table th[scope="row"] {
+  border-bottom: 1px solid var(--hairline);
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--fg-1);
+}
+
+.method-source {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-meta);
+  color: var(--fg-2);
+  line-height: 1.45;
+}
+
 .switch-row {
   position: relative;
   display: flex;
@@ -926,4 +990,9 @@ th[aria-sort="descending"] .sort-button {
   padding: var(--space-4);
   background: var(--surface);
   border-bottom: 1px solid var(--neutral-400);
+}
+
+/* Signal's display rules on tags would otherwise override the hidden attribute. */
+.sg-tag[hidden] {
+  display: none !important;
 }

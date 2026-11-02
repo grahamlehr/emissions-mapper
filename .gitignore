@@ -1,0 +1,7 @@
+# Repo kit
+.env*
+!.env.example
+.DS_Store
+.ua
+.venv/
+.claude/settings.local.json

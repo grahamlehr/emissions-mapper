@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Event Flight Emissions Mapper</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIINfQTo3c81hZ1oA2Z7S4Qb0b5mVhWQ6zU="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="src/styles.css" />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+      defer
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script type="module" src="src/main.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="control-panel" aria-label="Planning controls">
+        <section class="brand-block">
+          <p class="eyebrow">Event planning tool</p>
+          <h1>Flight emissions mapper</h1>
+          <p>
+            Add attendee locations, tune the travel policy, and compare the carbon
+            and jetlag impact of potential host cities. All data stays on your local browser. Use for comparing relative carbon impacts to guide conversations rather than as a post event reporting tool.
+          </p>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-heading">
+            <h2>Attendees</h2>
+            <button class="ghost-button" id="loadDemoButton" type="button">Demo</button>
+          </div>
+          <label class="upload-zone" for="attendeeFile">
+            <span class="upload-title">Upload Excel or CSV</span>
+            <span class="upload-help">Columns: location, country, people, optional airport</span>
+            <input id="attendeeFile" type="file" accept=".xlsx,.xls,.csv,.tsv" />
+          </label>
+          <div class="message" id="fileMessage" role="status"></div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-heading">
+            <h2>Travel policy</h2>
+            <span class="pill" id="policyValue">6 h</span>
+          </div>
+          <label class="slider-label" for="businessThreshold">
+            Assume business class over <strong id="policyText">6 hours</strong>
+          </label>
+          <input id="businessThreshold" type="range" min="2" max="14" step="1" value="6" />
+          <div class="policy-grid">
+            <label>
+              Economy kg CO2e / pax-km
+              <input id="economyFactor" type="number" min="0.01" max="1" step="0.005" value="0.115" />
+            </label>
+            <label>
+              Business multiplier
+              <input id="businessMultiplier" type="number" min="1" max="8" step="0.1" value="2.8" />
+            </label>
+          </div>
+          <label class="toggle-row">
+            <input id="nonCo2Toggle" type="checkbox" checked />
+            <span class="tooltip" tabindex="0" aria-describedby="nonCo2Tooltip">
+              Include non-CO2 uplift
+              <span class="tooltip-bubble" id="nonCo2Tooltip" role="tooltip">
+                Multiplies flight CO2 by 1.9 to approximate wider aviation climate effects such as contrails, nitrogen oxides, and high-altitude impacts.
+              </span>
+            </span>
+          </label>
+        </section>
+
+        <section class="panel-section compact">
+          <div class="section-heading">
+            <h2>Summary</h2>
+            <span class="pill muted" id="groupCount">0 groups</span>
+          </div>
+          <div class="metrics-grid">
+            <div>
+              <span>Total people</span>
+              <strong id="peopleCount">0</strong>
+            </div>
+            <div>
+              <span>Best option</span>
+              <strong id="bestCity">-</strong>
+            </div>
+            <div>
+              <span>Lowest footprint</span>
+              <strong id="bestEmissions">-</strong>
+            </div>
+            <div>
+              <span>Severe jetlag area</span>
+              <strong id="jetlagShare">-</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-section review-section">
+          <div class="section-heading">
+            <h2>Airport assumptions</h2>
+            <span class="pill muted">editable</span>
+          </div>
+          <div class="review-list" id="reviewList"></div>
+        </section>
+      </aside>
+
+      <section class="map-stage" aria-label="World emissions map">
+        <div class="map-toolbar">
+          <div class="segmented" role="group" aria-label="Map layers">
+            <button id="jetlagToggle" class="active" type="button">Jetlag</button>
+            <button id="routesToggle" type="button">Routes</button>
+          </div>
+          <div class="legend">
+            <span class="legend-item low">Lower</span>
+            <span class="legend-ramp" aria-hidden="true"></span>
+            <span class="legend-item high">Higher</span>
+            <span class="hatch-key" aria-hidden="true"></span>
+            <span>High jetlag</span>
+          </div>
+        </div>
+
+        <div class="map-wrap">
+          <div
+            id="worldMap"
+            role="img"
+            aria-label="OpenStreetMap world map with emissions heat, jetlag hatching, routes, and candidate destinations"
+          ></div>
+          <div class="destination-card" id="destinationCard">
+            <span class="card-kicker">Selected destination</span>
+            <h2 id="selectedName">Click a city</h2>
+            <dl>
+              <div><dt>Total emissions</dt><dd id="selectedEmissions">-</dd></div>
+              <div><dt>Per person</dt><dd id="selectedPerPerson">-</dd></div>
+              <div><dt>Avg flight</dt><dd id="selectedFlight">-</dd></div>
+              <div><dt>Jetlag score</dt><dd id="selectedJetlag">-</dd></div>
+            </dl>
+            <div class="top-drivers" id="topDrivers"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

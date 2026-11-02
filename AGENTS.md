@@ -8,7 +8,7 @@ A browser-only tool for event planners. Upload a spreadsheet of where attendees 
 
 ## Stack
 - Static HTML, CSS and vanilla ES modules. No build step, no package manager. `package.json` exists only to mark the repo as ESM for `node --test`. It has no dependencies.
-- `src/model.js` holds the airports, matching, parsing and scoring as pure functions, with no DOM access. `src/main.js` holds only the DOM and map code.
+- `src/model.js` holds the airports, matching, parsing and scoring as pure functions, with no DOM access. `src/labels.js` holds the map-label collision and pan-padding geometry. `src/main.js` holds only the DOM and map code.
 - Leaflet 1.9.4 (unpkg, SRI-pinned) with OpenStreetMap tiles; SheetJS for Excel parsing (CDN).
 - Styling: Graham's **Signal** design system. Tokens and the `.sg-*` class layer are copied into `src/styles/signal/` from `~/Documents/Signal Design System`; change them there first, then copy them across.
 - Hosted on GitHub Pages from `main`, repo root.
@@ -18,8 +18,8 @@ A browser-only tool for event planners. Upload a spreadsheet of where attendees 
 |---|---|
 | Install | None |
 | Dev | `python3 -m http.server 8080 --bind 127.0.0.1` (or the `static` entry in `.claude/launch.json`) |
-| Test | `node --test` (runs `tests/*.test.mjs` against `src/model.js`) |
-| Lint | `node --check src/main.js && node --check src/model.js` (syntax only) |
+| Test | `node --test` (runs `tests/*.test.mjs` against the pure modules `src/model.js` and `src/labels.js`) |
+| Lint | `for f in src/*.js; do node --check "$f"; done` (syntax only) |
 | Deploy | Merge to `main`. GitHub Pages publishes within a minute or two |
 
 ES modules don't load from `file://`, so always use the local server.

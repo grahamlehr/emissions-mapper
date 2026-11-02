@@ -1,3 +1,4 @@
+import { panPadding, pickVisibleLabels } from "./labels.js";
 import {
   AIRPORTS,
   SAMPLE_ROWS,
@@ -33,6 +34,8 @@ const state = {
     routes: false
   },
   view: "map",
+  pendingReveal: false,
+  labelFrame: 0,
   table: { sortKey: "total", direction: "asc", showAll: false }
 };
 
@@ -81,6 +84,7 @@ const els = {
   tableTab: document.querySelector("#tableTab"),
   mapControls: document.querySelector("#mapControls"),
   mapPanel: document.querySelector("#mapPanel"),
+  destinationCard: document.querySelector("#destinationCard"),
   tablePanel: document.querySelector("#tablePanel"),
   tableMeta: document.querySelector("#tableMeta"),
   tableScroll: document.querySelector("#tableScroll"),
@@ -159,7 +163,60 @@ function initMap() {
   state.mapLayers.routes = window.L.layerGroup().addTo(state.map);
   state.mapLayers.airports = window.L.layerGroup().addTo(state.map);
   state.mapReady = true;
+  // Zooming moves every marker relative to its neighbours; resizing changes the visible area.
+  state.map.on("zoomend resize", scheduleLabelLayout);
   requestAnimationFrame(() => state.map.invalidateSize());
+}
+
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+// Pans the map just enough to bring the selected airport into the part of the map the
+// destination card does not cover. Does nothing while the map is hidden (Table view).
+function revealSelected({ animate = true } = {}) {
+  if (!state.mapReady || els.mapPanel.hidden) return;
+  const selected = state.scores.find((score) => score.destination.code === state.selectedCode);
+  if (!selected) return;
+  const container = els.map.getBoundingClientRect();
+  if (!container.width || !container.height) return;
+  const card = els.destinationCard.getBoundingClientRect();
+  const padding = panPadding(container, card);
+  // The marker's code label extends to the right of the anchor point, so leave room for it.
+  state.map.panInside([selected.destination.lat, selected.destination.lon], {
+    paddingTopLeft: padding.topLeft,
+    paddingBottomRight: [padding.bottomRight[0] + 40, padding.bottomRight[1]],
+    animate: animate && !reducedMotion.matches
+  });
+}
+
+function scheduleLabelLayout() {
+  if (state.labelFrame) return;
+  state.labelFrame = requestAnimationFrame(() => {
+    state.labelFrame = 0;
+    layoutLabels();
+  });
+}
+
+// Hides the code labels that would overlap a more important one. Dots are never hidden, and
+// a hidden label comes back on hover or keyboard focus (see styles.css). Reads are batched
+// before writes so the pass causes a single layout.
+function layoutLabels() {
+  if (!state.mapReady || els.mapPanel.hidden) return;
+  const markers = [...els.map.querySelectorAll(".airport-marker")];
+  for (const marker of markers) marker.classList.remove("label-hidden");
+  const rank = new Map(state.scores.map((score, index) => [score.destination.code, index]));
+  const items = markers.map((marker) => {
+    const rect = marker.querySelector(".airport-code").getBoundingClientRect();
+    const code = marker.dataset.code;
+    return {
+      id: marker,
+      rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
+      priority: code === state.selectedCode ? -1 : rank.get(code) ?? Infinity
+    };
+  });
+  const visible = pickVisibleLabels(items, { margin: 2 });
+  for (const marker of markers) {
+    if (!visible.has(marker)) marker.classList.add("label-hidden");
+  }
 }
 
 
@@ -403,10 +460,12 @@ function renderAirports(min, max) {
       })
     }).addTo(state.mapLayers.airports);
 
-    const selectDestination = () => {
+    const selectDestination = ({ restoreFocus = false } = {}) => {
       state.selectedCode = score.destination.code;
       renderMap();
       renderSelected();
+      revealSelected();
+      if (restoreFocus) els.map.querySelector(`.airport-marker[data-code="${score.destination.code}"]`)?.focus();
     };
     marker.on("click", selectDestination);
 
@@ -415,14 +474,19 @@ function renderAirports(min, max) {
       markerElement.dataset.code = score.destination.code;
       markerElement.setAttribute("role", "button");
       markerElement.setAttribute("tabindex", "0");
+      markerElement.setAttribute(
+        "aria-label",
+        `${score.destination.city} (${score.destination.code}), ${formatTonnes(score.totalEmissionsKg)} total`
+      );
       markerElement.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          selectDestination();
+          selectDestination({ restoreFocus: true });
         }
       });
     }
   }
+  layoutLabels();
 }
 
 function renderSummary() {
@@ -540,6 +604,9 @@ function selectDestinationByCode(code) {
   markSelectedRow();
   renderMap();
   renderSelected();
+  // In Table view the map is hidden, so wait until the planner switches back to it.
+  if (state.view === "table") state.pendingReveal = true;
+  else revealSelected();
 }
 
 function setView(view, { focus = false } = {}) {
@@ -558,6 +625,10 @@ function setView(view, { focus = false } = {}) {
   } else if (state.mapReady) {
     state.map.invalidateSize();
     renderMap();
+    if (state.pendingReveal) {
+      state.pendingReveal = false;
+      revealSelected();
+    }
   }
 }
 
@@ -715,3 +786,10 @@ function wireEvents() {
 initMap();
 wireEvents();
 setGroups(SAMPLE_ROWS.map((row) => ({ ...row })), "Demo data");
+// Once layout has settled, make sure the default selection isn't hidden behind the card.
+requestAnimationFrame(() => {
+  if (!state.mapReady) return;
+  state.map.invalidateSize();
+  revealSelected({ animate: false });
+  layoutLabels();
+});

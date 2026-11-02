@@ -3,6 +3,8 @@ import {
   AIRPORTS,
   DESNZ_2026,
   SAMPLE_ROWS,
+  assumptionLines,
+  comparisonCsv,
   buildGroups,
   normalizeImportedRow,
   normalize,
@@ -93,7 +95,11 @@ const els = {
   tablePanel: document.querySelector("#tablePanel"),
   tableMeta: document.querySelector("#tableMeta"),
   tableScroll: document.querySelector("#tableScroll"),
-  tableToggle: document.querySelector("#tableToggle")
+  tableToggle: document.querySelector("#tableToggle"),
+  downloadCsv: document.querySelector("#downloadCsv"),
+  printTable: document.querySelector("#printTable"),
+  printDate: document.querySelector("#printDate"),
+  printAssumptions: document.querySelector("#printAssumptions")
 };
 
 // Factor inputs hold g CO2 per passenger-km and carry a path such as "shortHaul.economy".
@@ -589,6 +595,19 @@ function renderTable() {
     ? `${plural(people, "attendee", "attendees")} placed \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 ${els.nonCo2.checked ? `non-CO2 \u00d7${DESNZ_2026.nonCo2Multiplier}` : "non-CO2 off"}${factorsAreCustom(policy.factors) ? " \u00b7 custom factors" : ""}`
     : "";
 
+  els.downloadCsv.disabled = !scores.length;
+  els.printTable.disabled = !scores.length;
+  els.printDate.textContent = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  els.printAssumptions.innerHTML = scores.length
+    ? assumptionLines(policy, {
+        placedPeople: people,
+        placedGroups: placedGroups().length,
+        unplacedGroups: state.groups.length - placedGroups().length
+      })
+        .map((line) => `<li>${escapeHtml(line)}</li>`)
+        .join("")
+    : "";
+
   if (!scores.length) {
     els.tableScroll.innerHTML = `<div class="message">No groups are placed yet. Upload a file, load the demo data or pick an airport for at least one group to see the ranking.</div>`;
     els.tableToggle.hidden = true;
@@ -633,6 +652,50 @@ function renderTable() {
   els.tableToggle.hidden = scores.length <= TABLE_LIMIT;
   els.tableToggle.textContent = showAll ? `Show top ${TABLE_LIMIT}` : `Show all ${scores.length} cities`;
   els.tableToggle.setAttribute("aria-expanded", String(showAll));
+}
+
+function localDateStamp() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+// Saves every scored city, in the current sort order, as a CSV file. Built and downloaded in the
+// browser; nothing is uploaded. The byte-order mark lets Excel read accented city names correctly.
+function downloadComparisonCsv() {
+  if (!state.scores.length) return;
+  const { sortKey, direction } = state.table;
+  const blob = new Blob(["\ufeff", comparisonCsv(state.scores, { sortKey, direction })], {
+    type: "text/csv;charset=utf-8"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `host-city-comparison-${localDateStamp()}.csv`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Printing always shows the whole table, whichever view is open. Whatever was showing is put back after.
+let printRestore = null;
+
+function beforePrint() {
+  if (printRestore) return;
+  printRestore = { view: state.view, showAll: state.table.showAll };
+  state.table.showAll = true;
+  if (state.view !== "table") setView("table");
+  else renderTable();
+}
+
+function afterPrint() {
+  if (!printRestore) return;
+  const { view, showAll } = printRestore;
+  printRestore = null;
+  state.table.showAll = showAll;
+  if (view !== "table") setView(view);
+  else renderTable();
 }
 
 // Marks the selected row in place, so a click doesn't rebuild the table and drop keyboard focus.
@@ -834,6 +897,11 @@ function wireEvents() {
     event.preventDefault();
     selectDestinationByCode(row.dataset.code);
   });
+
+  els.downloadCsv.addEventListener("click", downloadComparisonCsv);
+  els.printTable.addEventListener("click", () => window.print());
+  window.addEventListener("beforeprint", beforePrint);
+  window.addEventListener("afterprint", afterPrint);
 
   els.tableToggle.addEventListener("click", () => {
     state.table.showAll = !state.table.showAll;

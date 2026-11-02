@@ -246,7 +246,18 @@
         </div>
 
         <div class="table-panel" id="tablePanel" role="tabpanel" aria-labelledby="tableTab" tabindex="-1" hidden>
-          <h2 class="table-title" id="tableTitle">Candidate host cities, ranked by total flight emissions</h2>
+          <div class="print-header">
+            <p class="print-kicker">Flight emissions mapper &mdash; host city comparison</p>
+            <p class="print-date" id="printDate"></p>
+            <ul class="print-assumptions" id="printAssumptions"></ul>
+          </div>
+          <div class="table-heading">
+            <h2 class="table-title" id="tableTitle">Candidate host cities, ranked by total flight emissions</h2>
+            <div class="table-export">
+              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="downloadCsv" type="button" disabled>Download CSV</button>
+              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="printTable" type="button" disabled>Print</button>
+            </div>
+          </div>
           <p class="table-meta" id="tableMeta"></p>
           <div class="table-scroll" id="tableScroll" tabindex="0" role="region" aria-labelledby="tableTitle"></div>
           <div class="table-actions"><button class="sg-btn sg-btn--sm sg-btn--secondary" id="tableToggle" type="button" hidden></button></div>

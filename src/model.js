@@ -425,6 +425,82 @@ export function sortScores(scores, key, direction = "asc") {
   );
 }
 
+export const CSV_HEADER = [
+  "Rank",
+  "City",
+  "Country",
+  "Airport",
+  "Total t CO2",
+  "Per person t CO2",
+  "Avg flight h",
+  "Avg jetlag h",
+  "Share with 6h+ jetlag %",
+  "Share in business class %"
+];
+
+// Text that a spreadsheet could read as a formula gets a leading apostrophe, so it stays text.
+function csvText(value) {
+  const text = String(value ?? "");
+  return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+}
+
+// RFC 4180: quote fields holding a comma, quote or line break, and double any inner quotes.
+function csvField(value) {
+  const text = String(value);
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+// The comparison as CSV text: every scored city, in the given sort order, with CRLF line endings.
+// Rank is always by total emissions (lowest = 1), whatever the sort. Cells are plain numbers.
+// No byte-order mark here; the download adds one so Excel reads the file as UTF-8.
+export function comparisonCsv(scores, { sortKey = "total", direction = "asc" } = {}) {
+  const rank = new Map(sortScores(scores, "total", "asc").map((score, index) => [score.destination.code, index + 1]));
+  const rows = sortScores(scores, sortKey, direction).map((score) => {
+    const d = score.destination;
+    return [
+      rank.get(d.code),
+      csvText(d.city),
+      csvText(d.country),
+      csvText(d.code),
+      (score.totalEmissionsKg / 1000).toFixed(2),
+      (score.averageEmissionsKg / 1000).toFixed(2),
+      score.averageHours.toFixed(1),
+      score.jetlagScore.toFixed(1),
+      Math.round(score.severeJetlagShare * 100),
+      Math.round(score.businessShare * 100)
+    ];
+  });
+  return [CSV_HEADER, ...rows].map((row) => row.map(csvField).join(",")).join("\r\n") + "\r\n";
+}
+
+function factorsDifferFromDefault(factors) {
+  const d = DESNZ_2026.factorsKgPerPkm;
+  const pairs = [
+    [factors.domestic, d.domestic],
+    [factors.shortHaul.economy, d.shortHaul.economy],
+    [factors.shortHaul.business, d.shortHaul.business],
+    [factors.longHaul.economy, d.longHaul.economy],
+    [factors.longHaul.business, d.longHaul.business]
+  ];
+  return pairs.some(([a, b]) => Math.abs(a - b) > 1e-9);
+}
+
+const countOf = (count, one, many) => `${count} ${count === 1 ? one : many}`;
+
+// Short plain-English lines describing the assumptions behind the figures, for the print header.
+export function assumptionLines(policy, { placedPeople, placedGroups, unplacedGroups }) {
+  const hours = policy.threshold;
+  const uplift = Math.round((policy.distanceUplift - 1) * 100);
+  return [
+    policy.returnTrip ? "Return journeys" : "One-way journeys",
+    `Business class over ${hours} ${hours === 1 ? "hour" : "hours"}`,
+    policy.nonCo2Multiplier > 1 ? `Non-CO2 uplift \u00d7${policy.nonCo2Multiplier}` : "Non-CO2 off",
+    factorsDifferFromDefault(policy.factors) ? "Factors: custom" : "Factors: DESNZ 2026",
+    `Distance +${uplift}%`,
+    `${countOf(placedPeople, "person", "people")} in ${countOf(placedGroups, "group", "groups")} placed; ${countOf(unplacedGroups, "group", "groups")} not placed`
+  ];
+}
+
 export function normalizeImportedRow(row) {
   const pick = (...keys) => keys.map((key) => row[key]).find((value) => value !== undefined && value !== "");
   return {

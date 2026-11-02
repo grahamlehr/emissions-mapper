@@ -996,3 +996,170 @@ th[aria-sort="descending"] .sort-button {
 .sg-tag[hidden] {
   display: none !important;
 }
+
+/* ---------- Export and print ---------- */
+
+.table-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.table-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.print-header {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 15mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    border-radius: 0 !important;
+  }
+
+  /* Table first, then the method note. Everything else on screen is for interacting. */
+  .app-shell {
+    display: flex !important;
+    flex-direction: column;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .map-stage {
+    order: 1;
+    height: auto !important;
+    display: block;
+  }
+
+  .control-panel {
+    order: 2;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0;
+    border: 0;
+  }
+
+  .control-panel > :not(.method-section),
+  .map-toolbar,
+  .map-wrap,
+  .table-export,
+  .table-actions,
+  .noscript-message,
+  .method-section .sg-tag {
+    display: none !important;
+  }
+
+  .table-panel {
+    display: flex !important;
+    overflow: visible !important;
+    padding: 0 0 8mm;
+  }
+
+  .table-panel[hidden] {
+    display: flex !important;
+  }
+
+  .print-header {
+    display: block;
+    margin-bottom: 4mm;
+  }
+
+  .print-kicker {
+    margin: 0;
+    font-size: 18pt;
+    font-weight: 700;
+  }
+
+  .print-date {
+    margin: 1mm 0 2mm;
+    font-size: 10pt;
+  }
+
+  .print-assumptions {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1mm 5mm;
+    font-size: 9pt;
+  }
+
+  .table-scroll {
+    overflow: visible !important;
+  }
+
+  .comparison-table {
+    min-width: 0;
+    width: 100%;
+    font-size: 9pt;
+  }
+
+  .comparison-table thead {
+    display: table-header-group;
+  }
+
+  .comparison-table tr {
+    break-inside: avoid;
+  }
+
+  /* Compact rows so the full list fits on about three pages. The print header already
+     lists the assumptions, so the on-screen meta line is dropped. */
+  .comparison-table th,
+  .comparison-table td {
+    padding-top: 1.2mm;
+    padding-bottom: 1.2mm;
+    border-bottom: 0.5pt solid #000;
+  }
+
+  .comparison-table td:nth-child(2) {
+    white-space: nowrap;
+  }
+
+  .table-meta {
+    display: none !important;
+  }
+
+  .sort-button {
+    font: inherit;
+    padding: 0;
+  }
+
+  .sort-arrow {
+    display: none;
+  }
+
+  .method-section {
+    break-inside: auto;
+    padding: 0;
+    border: 0;
+  }
+
+  .method-section li,
+  .method-table tr {
+    break-inside: avoid;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}

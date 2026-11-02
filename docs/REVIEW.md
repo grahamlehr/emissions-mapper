@@ -42,7 +42,8 @@ Housekeeping: `state.layers.heat` has no toggle, `group.id` is unused, the page 
 7. **Export and share.** Download the comparison as CSV, and as a PNG or print view of the map and table. Optionally encode the scenario (groups and policy, no names) in the URL hash so a link reproduces it without a server.
 8. **A column-mapping step after upload.** Show the detected headers and let the user pick which one is "people" and which is "location". This replaces guessing from a fixed list of names, so "Number of attendees" or "Home office" just work.
 9. **Jetlag that reflects the worst case.** The person-weighted average hides a group facing a 10-hour shift. Show "% of attendees with ≥ 6 h shift" per destination. Fix the "Severe jetlag area" metric, which counts *airports*, not people, and is hard to read.
-10. **Template download.** Add a "Download template" link with the right column names next to the upload box.
+10. **Keep the selected city visible.** Clicking a marker doesn't pan the map, so the selected city often sits behind the destination card. The European airport labels also overlap at world zoom. Pan to the selection, and hide or stack labels when they collide.
+11. **Template download.** Add a "Download template" link with the right column names next to the upload box.
 
 ## Technical suggestions
 

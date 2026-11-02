@@ -1,534 +1,535 @@
-:root {
-  color-scheme: light;
-  --ink: #1b2a34;
-  --muted: #65727a;
-  --line: #d8e0df;
-  --panel: #fbfcfa;
-  --paper: #ffffff;
-  --ocean: #d8eef0;
-  --land: #d8dcc8;
-  --green: #147d64;
-  --amber: #dd9f2c;
-  --coral: #d85f45;
-  --plum: #7a4c73;
-  --shadow: 0 20px 60px rgba(29, 50, 61, 0.16);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+/*
+  Flight emissions mapper: app styles on top of Signal.
+  Signal's tokens and .sg-* classes load first (src/styles/signal/index.css); this file only
+  adds layout and the few pieces Signal doesn't have. Use tokens, not hard-coded colours.
+  Rules: radius 0, no gradients, no soft shadows, no blur, no translucency. The hard offset
+  shadow is for the floating card and the popover only. The map's hatch and heat are data.
+*/
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  color: var(--ink);
-  background: #eef3f0;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
+/* ---------- Page shell ---------- */
 
 .app-shell {
   height: 100vh;
-  min-height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
   overflow: hidden;
+  background: var(--bg);
 }
 
 .control-panel {
   position: relative;
   z-index: 2;
   height: 100vh;
+  height: 100dvh;
   overflow: auto;
-  padding: 24px;
-  background: var(--panel);
-  border-right: 1px solid var(--line);
+  padding: var(--space-5);
+  background: var(--bg);
+  border-right: var(--border-rule) solid var(--rule);
 }
+
+/* ---------- Brand ---------- */
 
 .brand-block {
-  margin-bottom: 18px;
+  margin-bottom: var(--space-6);
 }
 
-.eyebrow,
-.card-kicker {
-  margin: 0 0 8px;
-  color: var(--green);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-h1,
-h2 {
-  margin: 0;
-  letter-spacing: 0;
-}
-
-h1 {
-  max-width: 18ch;
-  font-size: clamp(1.55rem, 2.2vw, 2.1rem);
-  line-height: 1.05;
-}
-
-.brand-block p:last-child {
-  max-width: 34rem;
-  margin: 10px 0 0;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.panel-section {
-  padding: 18px 0;
-  border-top: 1px solid var(--line);
-}
-
-.panel-section.compact {
-  padding-bottom: 10px;
-}
-
-.section-heading {
+.brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-top: var(--space-2);
+  font-size: 20px;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
-.section-heading h2 {
-  font-size: 1rem;
+.brand-mark {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
 }
 
-.ghost-button,
-.segmented button {
-  min-height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--ink);
-  background: var(--paper);
-  cursor: pointer;
+.brand-intro {
+  max-width: 34rem;
+  margin-top: var(--space-3);
+  font-size: var(--text-small);
+  color: var(--fg-2);
 }
 
-.ghost-button {
-  padding: 0 12px;
+/* ---------- Panel sections ---------- */
+
+.panel-section {
+  margin-bottom: var(--space-6);
 }
 
-.upload-zone {
-  display: grid;
-  gap: 4px;
-  padding: 18px;
-  border: 1px dashed #9bb0ac;
-  border-radius: 8px;
-  background: #f5f8f5;
-  cursor: pointer;
+/* Signal's numbered header, narrowed for a side panel: index / title / control. */
+.panel-head {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-4);
 }
 
-.upload-zone input {
-  margin-top: 8px;
-  max-width: 100%;
-}
-
-.upload-title {
-  font-weight: 800;
-}
-
-.upload-help,
-.message,
-.slider-label,
-.policy-grid label,
-.toggle-row,
-.metrics-grid span,
-.review-meta,
-.legend,
-.destination-card dt,
-.top-drivers {
-  color: var(--muted);
-  font-size: 0.85rem;
+.panel-head h2 {
+  font-size: 18px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
 .message {
   min-height: 20px;
-  margin-top: 8px;
+  margin-top: var(--space-2);
+  font-size: var(--text-meta);
+  color: var(--fg-2);
 }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: #dcefe8;
-  color: #0e644f;
-  font-size: 0.8rem;
-  font-weight: 800;
-  white-space: nowrap;
+/* ---------- Upload zone ---------- */
+
+.upload-zone {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px dashed var(--neutral-400);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease);
 }
 
-.pill.muted {
-  color: var(--muted);
-  background: #edf0ee;
+.upload-zone:hover {
+  background: var(--surface-2);
 }
+
+.upload-title {
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+}
+
+.upload-zone input[type="file"] {
+  max-width: 100%;
+  margin-top: var(--space-2);
+  font: var(--weight-regular) var(--text-meta)/1.4 var(--font-sans);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+/* Matches sg-btn sg-btn--secondary sg-btn--sm */
+.upload-zone input[type="file"]::file-selector-button {
+  height: var(--control-sm);
+  margin-right: var(--space-3);
+  padding: 0 var(--space-3);
+  font: var(--weight-medium) var(--text-meta)/1 var(--font-sans);
+  letter-spacing: -0.005em;
+  color: var(--fg-1);
+  background: transparent;
+  border: var(--border-rule) solid var(--fg-1);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+
+.upload-zone input[type="file"]::file-selector-button:hover {
+  background: var(--fg-1);
+  color: var(--bg);
+}
+
+/* ---------- Tags ---------- */
+
+/* Turns off Signal's uppercase, for values like "6 h". */
+.sg-tag--plain {
+  text-transform: none;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.sg-tag--warning {
+  background: var(--warning-tint);
+  border-color: var(--warning-tint);
+  color: var(--warning-text);
+}
+
+/* ---------- Travel policy ---------- */
 
 .slider-label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-small);
+  color: var(--fg-2);
+}
+
+.slider-label strong {
+  font-weight: var(--weight-medium);
+  color: var(--fg-1);
 }
 
 input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
   width: 100%;
-  accent-color: var(--green);
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]:focus-visible {
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--fg-1);
+  border: 0;
+  border-radius: 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  margin-top: -7px; /* centres the 16px thumb on the 2px track */
+  background: var(--accent);
+  border: 2px solid var(--fg-1);
+  border-radius: 0;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--fg-1);
+  border: 0;
+  border-radius: 0;
+}
+
+input[type="range"]::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border: 2px solid var(--fg-1);
+  border-radius: 0;
+}
+
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+input[type="range"]:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .policy-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 14px;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
-.policy-grid input,
-.review-row select {
-  width: 100%;
-  min-height: 38px;
-  margin-top: 6px;
-  padding: 7px 9px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.toggle-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.tooltip {
-  position: relative;
-  display: flex;
-  flex: 1;
-  align-items: center;
+/* Labels can wrap to different line counts; keep the inputs on one baseline. */
+.policy-grid .sg-field {
+  justify-content: space-between;
   min-width: 0;
-  color: inherit;
-  border-bottom: 1px dotted currentColor;
-  line-height: 1.25;
-  white-space: nowrap;
-  cursor: help;
 }
 
-.tooltip:focus-visible {
-  outline: 3px solid rgba(20, 125, 100, 0.28);
-  outline-offset: 2px;
+.policy-grid .sg-input {
+  font-variant-numeric: tabular-nums;
 }
 
-.tooltip-bubble {
+.switch-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+}
+
+.sg-switch {
+  position: relative; /* anchors Signal's visually hidden checkbox */
+}
+
+/* Popover: shown on hover or keyboard focus of the info button. It hangs below the row inside
+   the panel, so the scrolling panel never clips it. */
+.popover {
   position: absolute;
+  top: calc(100% + var(--space-2));
   left: 0;
-  bottom: calc(100% + 10px);
-  z-index: 20;
-  width: min(320px, calc(100vw - 64px));
-  padding: 10px 12px;
-  border: 1px solid rgba(27, 42, 52, 0.14);
-  border-radius: 8px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 12px 34px rgba(27, 42, 52, 0.18);
-  font-size: 0.8rem;
-  font-weight: 500;
-  line-height: 1.4;
+  z-index: 30;
+  width: min(300px, calc(100% - 6px)); /* leaves room for the 6px offset shadow */
+  max-width: 300px;
+  padding: var(--space-3);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-regular);
+  line-height: 1.45;
   text-align: left;
-  transform: translateY(4px);
+  white-space: normal;
+  color: var(--fg-1);
+  background: var(--surface);
+  border: var(--border-rule) solid var(--rule);
+  border-radius: 0;
+  box-shadow: var(--shadow-offset);
   visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 150ms ease, transform 150ms ease;
 }
 
-.tooltip-bubble::after {
+/* Bridges the gap so the pointer can move from the button onto the popover. */
+.popover::before {
   content: "";
   position: absolute;
-  left: 64px;
-  top: 100%;
-  width: 10px;
-  height: 10px;
-  border-right: 1px solid rgba(27, 42, 52, 0.14);
-  border-bottom: 1px solid rgba(27, 42, 52, 0.14);
-  background: rgba(255, 255, 255, 0.96);
-  transform: translate(-50%, -5px) rotate(45deg);
+  left: -2px;
+  right: -2px;
+  top: -12px;
+  height: 12px;
 }
 
-.tooltip:hover .tooltip-bubble,
-.tooltip:focus .tooltip-bubble,
-.tooltip:focus-within .tooltip-bubble {
-  transform: translateY(0);
+.info-button:hover ~ .popover,
+.info-button:focus-visible ~ .popover,
+.popover:hover {
   visibility: visible;
-  opacity: 1;
 }
+
+/* ---------- Summary ---------- */
 
 .metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--space-5) var(--space-4);
 }
 
-.metrics-grid div {
-  min-height: 76px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--paper);
+.metrics-grid > div {
+  min-width: 0;
+  padding-top: var(--space-2);
+  border-top: var(--border-rule) solid var(--rule);
+}
+
+.metrics-grid .sg-label {
+  display: block;
 }
 
 .metrics-grid strong {
   display: block;
-  margin-top: 8px;
-  font-size: 1.05rem;
+  margin-top: 6px;
+  font-size: 24px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "ss01", "tnum" 1; /* Signal's base turns tnum off, which beats font-variant */
+  overflow-wrap: anywhere;
 }
 
+/* ---------- Airport assumptions ---------- */
+
 .review-list {
-  display: grid;
-  gap: 10px;
   max-height: 320px;
   overflow: auto;
-  padding-right: 4px;
 }
 
 .review-row {
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--paper);
+  padding: var(--space-3) 0;
 }
 
-.review-row strong {
-  display: block;
+.review-row + .review-row {
+  border-top: 1px solid var(--hairline);
 }
 
-.review-meta {
+.review-row:first-child {
+  padding-top: 0;
+}
+
+.review-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 4px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
-.confidence {
-  font-weight: 800;
-  text-transform: capitalize;
+.review-place {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
 }
 
-.confidence.high {
-  color: var(--green);
+.review-place strong {
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
 }
 
-.confidence.medium {
-  color: #a56410;
+.review-people {
+  font-size: var(--text-meta);
+  color: var(--fg-2);
 }
 
-.confidence.low {
-  color: var(--coral);
+.review-row .sg-select {
+  min-width: 0;
 }
+
+/* ---------- Map stage ---------- */
 
 .map-stage {
   min-width: 0;
   height: 100vh;
-  min-height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0)),
-    var(--ocean);
+  background: var(--bg);
 }
 
 .map-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 18px 22px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: var(--border-rule) solid var(--rule);
 }
 
 .segmented {
   display: flex;
-  gap: 6px;
-}
-
-.segmented button {
-  padding: 0 12px;
-}
-
-.segmented button.active {
-  color: white;
-  border-color: var(--ink);
-  background: var(--ink);
+  gap: var(--space-2);
 }
 
 .legend {
   display: flex;
   align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  gap: var(--space-2) var(--space-3);
 }
 
-.legend-ramp {
-  width: 120px;
-  height: 12px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--green), var(--amber), var(--coral), var(--plum));
+.legend-swatches {
+  display: inline-flex;
+  gap: 2px;
 }
+
+/* Same four colours as DATA_COLOURS in main.js, taken from Signal's tokens. */
+.swatch {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.swatch-1 { background: var(--green-500); }
+.swatch-2 { background: var(--amber-500); }
+.swatch-3 { background: var(--red-500); }
+.swatch-4 { background: var(--red-800); }
 
 .hatch-key {
+  display: inline-block;
   width: 28px;
   height: 16px;
-  border: 1px solid rgba(27, 42, 52, 0.2);
-  border-radius: 4px;
-  background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(27, 42, 52, 0.55) 4px 6px);
+  border: 1px solid var(--fg-1);
+  background: repeating-linear-gradient(45deg, transparent 0 4px, var(--fg-1) 4px 6px);
 }
 
 .map-wrap {
   position: relative;
+  isolation: isolate; /* keeps Leaflet's pane z-indexes inside the map */
   min-height: 0;
   height: 100%;
   overflow: hidden;
 }
 
 #worldMap {
+  display: block;
   width: 100%;
   height: 100%;
-  min-height: 620px;
-  display: block;
-  background: #cfe5e9;
+  min-height: 360px;
 }
 
-/* Local fallback for Leaflet's structural CSS so map panes never flow as page content. */
-.leaflet-pane,
-.leaflet-tile,
-.leaflet-marker-icon,
-.leaflet-marker-shadow,
-.leaflet-tile-container,
-.leaflet-pane > svg,
-.leaflet-pane > canvas,
-.leaflet-zoom-box,
-.leaflet-image-layer,
-.leaflet-layer {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
+/* ---------- Leaflet, restyled ---------- */
 
 .leaflet-container {
-  overflow: hidden;
-  touch-action: none;
+  font-family: var(--font-sans);
+  background: var(--bg);
 }
 
+/* Greyscale the basemap only, per Signal's black-and-white imagery rule. Data layers keep colour. */
 .leaflet-tile-pane {
-  z-index: 200;
+  filter: grayscale(1) contrast(1.05) brightness(1.04);
 }
 
-.leaflet-overlay-pane {
-  z-index: 400;
-}
-
-.leaflet-shadow-pane {
-  z-index: 500;
-}
-
-.leaflet-marker-pane {
-  z-index: 600;
-}
-
-.leaflet-tooltip-pane {
-  z-index: 650;
-}
-
-.leaflet-popup-pane {
-  z-index: 700;
-}
-
-.leaflet-tile,
-.leaflet-marker-icon,
-.leaflet-marker-shadow {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.leaflet-tile {
+.leaflet-container .leaflet-bar {
   border: 0;
-  visibility: hidden;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
 }
 
-.leaflet-tile-loaded {
-  visibility: inherit;
+.leaflet-container .leaflet-bar a,
+.leaflet-container .leaflet-bar a:first-child,
+.leaflet-container .leaflet-bar a:last-child {
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  font: var(--weight-medium) 18px/28px var(--font-sans);
+  text-indent: 0;
+  color: var(--fg-1);
+  background-color: var(--surface);
+  border: var(--border-rule) solid var(--fg-1);
+  border-radius: 0;
+  transition: background var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
 }
 
-.leaflet-control {
-  position: relative;
-  z-index: 800;
-  pointer-events: auto;
+.leaflet-container .leaflet-bar a + a {
+  margin-top: -2px; /* share the 2px border between the two buttons */
 }
 
-.leaflet-top,
-.leaflet-bottom {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: none;
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-bar a:focus-visible {
+  color: var(--bg);
+  background-color: var(--fg-1);
 }
 
-.leaflet-top {
-  top: 0;
+.leaflet-container .leaflet-bar a.leaflet-disabled {
+  color: var(--fg-3);
+  background-color: var(--surface-2);
+  cursor: default;
 }
 
-.leaflet-right {
-  right: 0;
+.leaflet-container .leaflet-control-attribution {
+  padding: 2px var(--space-2);
+  font: var(--weight-regular) var(--text-micro)/1.4 var(--font-mono);
+  color: var(--fg-2);
+  background: var(--surface);
+  border-radius: 0;
 }
 
-.leaflet-bottom {
-  bottom: 0;
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--fg-1);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: background var(--duration-fast) var(--ease);
 }
 
-.leaflet-left {
-  left: 0;
+.leaflet-container .leaflet-control-attribution a:hover {
+  color: var(--on-accent);
+  background: var(--accent);
+  text-decoration-color: transparent;
 }
 
-.leaflet-control-zoom a {
-  display: block;
-  width: 30px;
-  height: 30px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid var(--line);
-  text-align: center;
-  text-decoration: none;
-  line-height: 30px;
-}
-
-#worldMap .leaflet-container,
-.leaflet-container {
-  font-family: inherit;
-}
+/* ---------- Map data ---------- */
 
 .heat-spot {
   mix-blend-mode: multiply;
-  filter: blur(0.2px);
 }
 
+/* Jetlag zone: a circle with a 45 degree hatch. It is map data, so the circle stays. */
 .jetlag-zone {
-  border: 1px solid rgba(27, 42, 52, 0.28);
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--fg-1) 28%, transparent);
   border-radius: 50%;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0) 0 5px,
-      rgba(27, 42, 52, 0.52) 5px 7px
-    );
+  background: repeating-linear-gradient(45deg, transparent 0 5px, var(--fg-1) 5px 7px);
   opacity: 0.48;
   pointer-events: none;
 }
@@ -542,10 +543,11 @@ input[type="range"] {
   pointer-events: none;
 }
 
+/* Airport markers: Signal keeps circles for radio dots, so these are squares. */
 .airport-marker {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   width: 58px !important;
   height: 28px !important;
   border: 0;
@@ -554,27 +556,27 @@ input[type="range"] {
 }
 
 .airport-dot {
-  width: 15px;
-  height: 15px;
+  flex: none;
+  box-sizing: border-box;
   display: inline-block;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: 2px; /* centres the dot on the marker's 9px anchor */
+  border: 2px solid var(--surface);
+  border-radius: 0;
   background: var(--marker-color);
-  box-shadow: 0 2px 8px rgba(27, 42, 52, 0.28);
 }
 
 .airport-code {
   display: inline-flex;
   align-items: center;
-  min-height: 19px;
+  height: 19px;
   padding: 0 5px;
-  border-radius: 5px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 1px 4px rgba(27, 42, 52, 0.14);
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
+  font: var(--weight-medium) 11px/1 var(--font-mono);
+  color: var(--fg-1);
+  background: var(--surface);
+  border: 1px solid var(--fg-1);
+  border-radius: 0;
 }
 
 .airport-marker.selected {
@@ -582,41 +584,51 @@ input[type="range"] {
 }
 
 .airport-marker.selected .airport-dot {
-  width: 20px;
-  height: 20px;
-  border-color: var(--ink);
+  width: 18px;
+  height: 18px;
+  margin-left: 0;
+  margin-right: -2px; /* keeps the label where it was */
+  border-color: var(--fg-1);
 }
+
+.airport-marker.selected .airport-code {
+  color: var(--bg);
+  background: var(--fg-1);
+}
+
+/* ---------- Destination card ---------- */
 
 .destination-card {
   position: absolute;
-  right: 22px;
-  bottom: 22px;
-  width: min(360px, calc(100% - 44px));
-  padding: 18px;
-  border: 1px solid rgba(216, 224, 223, 0.88);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
+  right: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 1100;
+  width: min(360px, calc(100% - 48px));
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  gap: var(--space-2);
+  background: var(--surface);
+  border-radius: 0;
+  box-shadow: var(--shadow-offset);
 }
 
 .destination-card h2 {
-  margin-bottom: 14px;
-  font-size: 1.35rem;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-h4);
+  letter-spacing: -0.015em;
+  overflow-wrap: anywhere;
 }
 
 .destination-card dl {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: var(--space-3) var(--space-4);
   margin: 0;
 }
 
-.destination-card dl div {
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(251, 252, 250, 0.8);
+.destination-card dl > div {
+  min-width: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--hairline);
 }
 
 .destination-card dt,
@@ -625,19 +637,31 @@ input[type="range"] {
 }
 
 .destination-card dd {
-  margin-top: 5px;
-  font-weight: 800;
+  margin-top: var(--space-1);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "ss01", "tnum" 1;
+  overflow-wrap: anywhere;
 }
 
 .top-drivers {
-  margin-top: 12px;
+  margin-top: var(--space-1);
+  font-size: var(--text-meta);
   line-height: 1.45;
+  color: var(--fg-2);
 }
+
+/* ---------- Responsive ---------- */
 
 @media (max-width: 980px) {
   .app-shell {
-    grid-template-columns: 1fr;
     height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    grid-template-columns: minmax(0, 1fr);
     overflow: visible;
   }
 
@@ -645,15 +669,15 @@ input[type="range"] {
     height: auto;
     max-height: none;
     border-right: 0;
-    border-bottom: 1px solid var(--line);
+    border-bottom: var(--border-rule) solid var(--rule);
   }
 
   .map-stage {
     height: auto;
   }
 
-  h1 {
-    max-width: none;
+  .map-wrap {
+    height: auto;
   }
 
   .review-list {
@@ -670,26 +694,41 @@ input[type="range"] {
   }
 
   #worldMap {
+    height: 520px;
     min-height: 520px;
   }
 }
 
 @media (max-width: 560px) {
-  .control-panel,
+  .control-panel {
+    padding: var(--space-4);
+  }
+
   .map-toolbar {
-    padding: 16px;
+    padding: var(--space-3) var(--space-4);
   }
 
   .policy-grid,
-  .metrics-grid,
-  .destination-card dl {
+  .metrics-grid {
     grid-template-columns: 1fr;
   }
 
+  .map-wrap {
+    height: auto;
+  }
+
+  #worldMap {
+    height: 480px;
+    min-height: 480px;
+  }
+
+  /* On a phone the card would hide most of the map, so it sits below it instead of floating. */
   .destination-card {
-    left: 16px;
-    right: 16px;
-    bottom: 16px;
+    position: static;
     width: auto;
+    border: 0;
+    border-top: var(--border-rule) solid var(--rule);
+    box-shadow: none;
+    padding: var(--space-4);
   }
 }

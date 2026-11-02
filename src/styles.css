@@ -617,6 +617,30 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   background: var(--fg-1);
 }
 
+/* Labels that would collide with a higher-ranked one are hidden (see layoutLabels in
+   main.js). The dot stays, and the label returns on hover or keyboard focus. */
+.airport-marker.label-hidden {
+  pointer-events: none;
+}
+
+.airport-marker.label-hidden .airport-dot {
+  pointer-events: auto;
+}
+
+.airport-marker.label-hidden .airport-code {
+  visibility: hidden;
+}
+
+.airport-marker:hover,
+.airport-marker:focus-visible {
+  z-index: 1050 !important;
+}
+
+.airport-marker.label-hidden:hover .airport-code,
+.airport-marker.label-hidden:focus-visible .airport-code {
+  visibility: visible;
+}
+
 /* ---------- Comparison table ---------- */
 
 .table-panel {

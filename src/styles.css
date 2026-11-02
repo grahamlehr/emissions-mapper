@@ -392,6 +392,27 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   border-bottom: var(--border-rule) solid var(--rule);
 }
 
+.view-tabs {
+  flex: none;
+  border-bottom: 0;
+  align-self: stretch;
+}
+
+.map-controls {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.map-controls[hidden],
+.table-panel[hidden],
+.map-wrap[hidden] {
+  display: none;
+}
+
 .segmented {
   display: flex;
   gap: var(--space-2);
@@ -596,6 +617,108 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   background: var(--fg-1);
 }
 
+/* ---------- Comparison table ---------- */
+
+.table-panel {
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.table-title {
+  margin: 0;
+  font-size: var(--text-h4);
+  letter-spacing: -0.015em;
+}
+
+.table-meta {
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--fg-2);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.comparison-table {
+  min-width: 640px;
+}
+
+/* Headers and city names wrap so all eight columns fit beside the panel at desktop widths. */
+.comparison-table th,
+.comparison-table td {
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+  vertical-align: bottom;
+}
+
+.comparison-table td {
+  vertical-align: middle;
+}
+
+.comparison-table td.num {
+  white-space: nowrap;
+}
+
+.comparison-table tbody tr {
+  cursor: pointer;
+}
+
+.comparison-table tbody tr.selected td {
+  background: var(--surface-2);
+}
+
+.comparison-table tbody tr.selected td:first-child {
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.comparison-table tbody tr:focus-visible {
+  outline: 2px solid var(--fg-1);
+  outline-offset: -2px;
+}
+
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sort-button:hover,
+th[aria-sort="ascending"] .sort-button,
+th[aria-sort="descending"] .sort-button {
+  color: var(--fg-1);
+}
+
+.sort-arrow {
+  display: inline-block;
+  min-width: 1em;
+  font-size: var(--text-micro);
+}
+
+.city-code {
+  margin-left: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  color: var(--fg-2);
+}
+
+.table-actions {
+  display: flex;
+}
+
 /* ---------- Destination card ---------- */
 
 .destination-card {
@@ -689,6 +812,12 @@ input[type="range"]:focus-visible::-moz-range-thumb {
     flex-direction: column;
   }
 
+  .map-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
   .legend {
     justify-content: flex-start;
   }
@@ -706,6 +835,10 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 
   .map-toolbar {
     padding: var(--space-3) var(--space-4);
+  }
+
+  .table-panel {
+    padding: var(--space-4);
   }
 
   .policy-grid,

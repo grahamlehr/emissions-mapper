@@ -5,7 +5,8 @@ import {
   normalizeImportedRow,
   normalize,
   parseCsv,
-  scoreAll
+  scoreAll,
+  sortScores
 } from "./model.js";
 
 // Heat and marker colours, lowest to highest emissions. These mirror Signal's tokens
@@ -30,8 +31,23 @@ const state = {
     heat: true,
     jetlag: true,
     routes: false
-  }
+  },
+  view: "map",
+  table: { sortKey: "total", direction: "asc", showAll: false }
 };
+
+const TABLE_LIMIT = 10;
+
+// Columns of the comparison table. `text` columns sort A to Z first; numbers sort lowest first.
+const TABLE_COLUMNS = [
+  { key: "city", label: "City", numeric: false },
+  { key: "total", label: "Total t CO2e", numeric: true },
+  { key: "perPerson", label: "Per person", numeric: true },
+  { key: "hours", label: "Avg flight", numeric: true },
+  { key: "jetlag", label: "Avg jetlag", numeric: true },
+  { key: "severeJetlag", label: "\u2265 6 h jetlag", numeric: true },
+  { key: "business", label: "Business class", numeric: true }
+];
 
 const els = {
   file: document.querySelector("#attendeeFile"),
@@ -60,7 +76,15 @@ const els = {
   topDrivers: document.querySelector("#topDrivers"),
   heatToggle: document.querySelector("#heatToggle"),
   jetlagToggle: document.querySelector("#jetlagToggle"),
-  routesToggle: document.querySelector("#routesToggle")
+  routesToggle: document.querySelector("#routesToggle"),
+  mapTab: document.querySelector("#mapTab"),
+  tableTab: document.querySelector("#tableTab"),
+  mapControls: document.querySelector("#mapControls"),
+  mapPanel: document.querySelector("#mapPanel"),
+  tablePanel: document.querySelector("#tablePanel"),
+  tableMeta: document.querySelector("#tableMeta"),
+  tableScroll: document.querySelector("#tableScroll"),
+  tableToggle: document.querySelector("#tableToggle")
 };
 
 function getPolicy() {
@@ -87,7 +111,9 @@ function calculateScores() {
 
 function formatTonnes(kg) {
   if (!Number.isFinite(kg)) return "-";
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)} t`;
+  if (kg >= 1000) {
+    return `${(kg / 1000).toLocaleString("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} t`;
+  }
   return `${Math.round(kg)} kg`;
 }
 
@@ -439,6 +465,102 @@ function renderSelected() {
   els.topDrivers.textContent = `Top contributors: ${drivers || "-"}. Figures are for ${trips}. Business class policy affects ${businessShare}% of attendees for this destination.`;
 }
 
+function formatPercent(share) {
+  return `${Math.round(share * 100)}%`;
+}
+
+function renderTable() {
+  const scores = state.scores;
+  const { sortKey, direction, showAll } = state.table;
+  const policy = getPolicy();
+  const people = scores.length ? scores[0].totalPeople : 0;
+  const hours = policy.threshold;
+  els.tableMeta.textContent = scores.length
+    ? `${plural(people, "attendee", "attendees")} placed \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 non-CO2 uplift ${els.nonCo2.checked ? "on" : "off"}`
+    : "";
+
+  if (!scores.length) {
+    els.tableScroll.innerHTML = `<div class="message">No groups are placed yet. Upload a file, load the demo data or pick an airport for at least one group to see the ranking.</div>`;
+    els.tableToggle.hidden = true;
+    return;
+  }
+
+  // scoreAll returns lowest total first, so a city's rank is its position there.
+  const rank = new Map(scores.map((score, index) => [score.destination.code, index + 1]));
+  const sorted = sortScores(scores, sortKey, direction);
+  const visible = showAll ? sorted : sorted.slice(0, TABLE_LIMIT);
+
+  const headers = [`<th scope="col" class="num">Rank</th>`]
+    .concat(
+      TABLE_COLUMNS.map((column) => {
+        const active = column.key === sortKey;
+        const ariaSort = active ? (direction === "asc" ? "ascending" : "descending") : "none";
+        const arrow = active ? (direction === "asc" ? "\u25b2" : "\u25bc") : "";
+        return `<th scope="col" class="${column.numeric ? "num" : ""}" aria-sort="${ariaSort}"><button type="button" class="sort-button" data-sort="${column.key}">${column.label}<span class="sort-arrow" aria-hidden="true">${arrow}</span></button></th>`;
+      })
+    )
+    .join("");
+
+  const rows = visible
+    .map((score) => {
+      const d = score.destination;
+      const selected = d.code === state.selectedCode;
+      return `<tr class="${selected ? "selected" : ""}" data-code="${d.code}" tabindex="0"${selected ? ` aria-current="true"` : ""}>
+        <td class="num">${rank.get(d.code)}</td>
+        <td><span class="city-name">${escapeHtml(d.city)}</span>, ${escapeHtml(d.country)} <span class="city-code">${d.code}</span></td>
+        <td class="num">${formatTonnes(score.totalEmissionsKg)}</td>
+        <td class="num">${formatTonnes(score.averageEmissionsKg)}</td>
+        <td class="num">${formatHours(score.averageHours)}</td>
+        <td class="num">${score.jetlagScore.toFixed(1)} h</td>
+        <td class="num">${formatPercent(score.severeJetlagShare)}</td>
+        <td class="num">${formatPercent(score.businessShare)}</td>
+      </tr>`;
+    })
+    .join("");
+
+  els.tableScroll.innerHTML = `<table class="sg-table comparison-table" aria-labelledby="tableTitle"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;
+
+  els.tableToggle.hidden = scores.length <= TABLE_LIMIT;
+  els.tableToggle.textContent = showAll ? `Show top ${TABLE_LIMIT}` : `Show all ${scores.length} cities`;
+  els.tableToggle.setAttribute("aria-expanded", String(showAll));
+}
+
+// Marks the selected row in place, so a click doesn't rebuild the table and drop keyboard focus.
+function markSelectedRow() {
+  for (const row of els.tableScroll.querySelectorAll("tbody tr")) {
+    const selected = row.dataset.code === state.selectedCode;
+    row.classList.toggle("selected", selected);
+    if (selected) row.setAttribute("aria-current", "true");
+    else row.removeAttribute("aria-current");
+  }
+}
+
+function selectDestinationByCode(code) {
+  state.selectedCode = code;
+  markSelectedRow();
+  renderMap();
+  renderSelected();
+}
+
+function setView(view, { focus = false } = {}) {
+  state.view = view;
+  const isTable = view === "table";
+  els.mapTab.setAttribute("aria-selected", String(!isTable));
+  els.tableTab.setAttribute("aria-selected", String(isTable));
+  els.mapTab.tabIndex = isTable ? -1 : 0;
+  els.tableTab.tabIndex = isTable ? 0 : -1;
+  els.mapPanel.hidden = isTable;
+  els.tablePanel.hidden = !isTable;
+  els.mapControls.hidden = isTable;
+  if (focus) (isTable ? els.tableTab : els.mapTab).focus();
+  if (isTable) {
+    renderTable();
+  } else if (state.mapReady) {
+    state.map.invalidateSize();
+    renderMap();
+  }
+}
+
 function updatePolicyCopy() {
   const value = Number(els.threshold.value);
   els.policyValue.textContent = `${value} h`;
@@ -453,6 +575,7 @@ function updateAll() {
   if (state.mapReady) state.map.invalidateSize();
   renderMap();
   renderSelected();
+  renderTable();
 }
 
 async function parseFile(file) {
@@ -530,6 +653,48 @@ function wireEvents() {
   els.returnTrip.addEventListener("input", updateAll);
   els.economyFactor.addEventListener("input", debouncedUpdate);
   els.businessMultiplier.addEventListener("input", debouncedUpdate);
+
+  for (const tab of [els.mapTab, els.tableTab]) {
+    tab.addEventListener("click", () => setView(tab === els.tableTab ? "table" : "map"));
+    tab.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === "Home" ? "map" : event.key === "End" ? "table" : tab === els.mapTab ? "table" : "map";
+      setView(next, { focus: true });
+    });
+  }
+
+  els.tableScroll.addEventListener("click", (event) => {
+    const sortButton = event.target.closest("[data-sort]");
+    if (sortButton) {
+      const key = sortButton.dataset.sort;
+      const table = state.table;
+      if (table.sortKey === key) {
+        table.direction = table.direction === "asc" ? "desc" : "asc";
+      } else {
+        table.sortKey = key;
+        table.direction = "asc";
+      }
+      renderTable();
+      els.tableScroll.querySelector(`[data-sort="${key}"]`)?.focus();
+      return;
+    }
+    const row = event.target.closest("tbody tr");
+    if (row) selectDestinationByCode(row.dataset.code);
+  });
+
+  els.tableScroll.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const row = event.target.closest("tbody tr");
+    if (!row || event.target !== row) return;
+    event.preventDefault();
+    selectDestinationByCode(row.dataset.code);
+  });
+
+  els.tableToggle.addEventListener("click", () => {
+    state.table.showAll = !state.table.showAll;
+    renderTable();
+  });
 
   [
     [els.heatToggle, "heat"],

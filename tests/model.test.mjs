@@ -9,6 +9,9 @@ import {
   parseCsv,
   parsePeople,
   scoreAll,
+  scoreDestination,
+  sortScores,
+  airportByCode,
   tzDifference
 } from "../src/model.js";
 
@@ -160,4 +163,58 @@ test("tzDifference wraps around the date line", () => {
   assert.equal(tzDifference(12, -11), 1);
   assert.equal(tzDifference(-5, 5.5), 10.5);
   assert.equal(tzDifference(0, 0), 0);
+});
+
+const POLICY = { threshold: 6, economyFactor: 0.115, businessMultiplier: 2.8, nonCo2Multiplier: 1, returnTrip: true };
+
+test("scoreDestination reports severe jetlag and business class shares", () => {
+  // To London: Delhi is a 5.5 h shift (not severe), Sydney 10 h (severe). Both fly over 6 h.
+  const groups = [
+    { people: 10, airportCode: "DEL" },
+    { people: 30, airportCode: "SYD" },
+    { people: 60, airportCode: "LHR" },
+    { people: 99, airportCode: null }
+  ];
+  const london = scoreDestination(airportByCode("LHR"), groups, POLICY);
+  assert.equal(london.totalPeople, 100);
+  assert.equal(london.severeJetlagShare, 0.3);
+  assert.equal(london.businessShare, london.businessClassPeople / 100);
+  assert.equal(london.businessClassPeople, 40);
+  const empty = scoreDestination(airportByCode("LHR"), [], POLICY);
+  assert.equal(empty.severeJetlagShare, 0);
+  assert.equal(empty.businessShare, 0);
+  assert.equal(scoreDestination(airportByCode("SYD"), groups, POLICY).severeJetlagShare, 0.6); // London is 10 h from Sydney
+});
+
+test("sortScores sorts by each key without mutating the input", () => {
+  const scores = scoreAll(
+    [{ people: 10, airportCode: "LHR" }, { people: 5, airportCode: "SYD" }, { people: 8, airportCode: "JFK" }],
+    POLICY
+  );
+  const before = scores.map((s) => s.destination.code);
+  const keys = {
+    total: "totalEmissionsKg",
+    perPerson: "averageEmissionsKg",
+    hours: "averageHours",
+    jetlag: "jetlagScore",
+    severeJetlag: "severeJetlagShare",
+    business: "businessShare"
+  };
+  for (const [key, field] of Object.entries(keys)) {
+    const asc = sortScores(scores, key, "asc").map((s) => s[field]);
+    const desc = sortScores(scores, key, "desc").map((s) => s[field]);
+    assert.deepEqual(asc, [...asc].sort((a, b) => a - b), `${key} asc`);
+    assert.deepEqual(desc, [...desc].sort((a, b) => b - a), `${key} desc`);
+  }
+  const cities = sortScores(scores, "city", "asc").map((s) => s.destination.city);
+  assert.deepEqual(cities, [...cities].sort((a, b) => a.localeCompare(b)));
+  assert.deepEqual(sortScores(scores, "city", "desc").map((s) => s.destination.city), cities.toReversed());
+  assert.deepEqual(scores.map((s) => s.destination.code), before);
+});
+
+test("sortScores breaks ties by total emissions then city", () => {
+  const mk = (city, total, jetlagScore) => ({ destination: { city }, totalEmissionsKg: total, jetlagScore });
+  const scores = [mk("Zed", 5, 1), mk("Bee", 9, 1), mk("Ace", 5, 1), mk("Low", 1, 1)];
+  assert.deepEqual(sortScores(scores, "jetlag", "asc").map((s) => s.destination.city), ["Low", "Ace", "Zed", "Bee"]);
+  assert.deepEqual(sortScores(scores, "jetlag", "desc").map((s) => s.destination.city), ["Low", "Ace", "Zed", "Bee"]);
 });

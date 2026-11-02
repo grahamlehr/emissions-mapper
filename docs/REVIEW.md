@@ -14,6 +14,7 @@ Each finding was checked by running the app in a browser or calling the function
 - **Product suggestion 1 is done.** Unplaced groups are shown in a banner, listed first and left out of the totals.
 - **Product suggestion 2 is partly done.** Matching is whole-word and checks the country first. The airport list grew from 40 to 90, with city aliases and one hub per country. Still to do: a bundled city gazetteer and nearest-airport lookup.
 - **Product suggestion 4 is partly done.** Return trips are the default, with a switch for one-way. Still to do: the method note and DEFRA short-haul and long-haul factors.
+- **Product suggestion 3 is done.** A Map / Table switch shows a sortable ranking of the top 10 or all host cities, with total, per person, average flight, average jetlag, the share of people with a shift of 6 h or more, and the share in business class. That share column covers the per-destination part of suggestion 9.
 - **The model is split out.** It lives in `src/model.js`, with tests in `tests/model.test.mjs`.
 - **New gap.** With 90 airports, labels collide more at world zoom (see suggestion 10).
 

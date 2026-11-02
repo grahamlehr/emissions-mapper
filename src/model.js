@@ -320,6 +320,9 @@ export function emissionsForLeg(distanceKm, hours, people, policy) {
   return distanceKm * people * policy.economyFactor * cabinMultiplier * policy.nonCo2Multiplier * trips;
 }
 
+// A time-zone shift of at least this many hours counts as severe jetlag.
+export const SEVERE_JETLAG_HOURS = 6;
+
 // Groups without an airport are left out of every total.
 export function scoreDestination(destination, groups, policy) {
   let totalEmissionsKg = 0;
@@ -327,6 +330,7 @@ export function scoreDestination(destination, groups, policy) {
   let weightedHours = 0;
   let weightedJetlag = 0;
   let businessClassPeople = 0;
+  let severeJetlagPeople = 0;
   const drivers = [];
 
   for (const group of groups) {
@@ -341,6 +345,7 @@ export function scoreDestination(destination, groups, policy) {
     weightedHours += hours * group.people;
     weightedJetlag += jetlag * group.people;
     if (hours > policy.threshold) businessClassPeople += group.people;
+    if (jetlag >= SEVERE_JETLAG_HOURS) severeJetlagPeople += group.people;
     drivers.push({ origin, people: group.people, emissionsKg, hours, jetlag });
   }
 
@@ -353,6 +358,8 @@ export function scoreDestination(destination, groups, policy) {
     averageHours: totalPeople ? weightedHours / totalPeople : 0,
     jetlagScore: totalPeople ? weightedJetlag / totalPeople : 0,
     businessClassPeople,
+    businessShare: totalPeople ? businessClassPeople / totalPeople : 0,
+    severeJetlagShare: totalPeople ? severeJetlagPeople / totalPeople : 0,
     drivers
   };
 }
@@ -361,6 +368,27 @@ export function scoreDestination(destination, groups, policy) {
 export function scoreAll(groups, policy) {
   return AIRPORTS.map((airport) => scoreDestination(airport, groups, policy)).sort(
     (a, b) => a.totalEmissionsKg - b.totalEmissionsKg
+  );
+}
+
+const SORT_VALUES = {
+  total: (score) => score.totalEmissionsKg,
+  perPerson: (score) => score.averageEmissionsKg,
+  hours: (score) => score.averageHours,
+  jetlag: (score) => score.jetlagScore,
+  severeJetlag: (score) => score.severeJetlagShare,
+  business: (score) => score.businessShare
+};
+
+// Returns a new, sorted array. Keys: total, perPerson, hours, jetlag, severeJetlag, business, city.
+// Ties are broken by total emissions (lowest first), then city name, whatever the direction.
+export function sortScores(scores, key, direction = "asc") {
+  const sign = direction === "desc" ? -1 : 1;
+  const byCity = (a, b) => a.destination.city.localeCompare(b.destination.city);
+  const primary = key === "city" ? byCity : (a, b) => SORT_VALUES[key](a) - SORT_VALUES[key](b);
+  if (key !== "city" && !SORT_VALUES[key]) throw new Error(`Unknown sort key: ${key}`);
+  return [...scores].sort(
+    (a, b) => sign * primary(a, b) || a.totalEmissionsKg - b.totalEmissionsKg || byCity(a, b)
   );
 }
 

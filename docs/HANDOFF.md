@@ -1,5 +1,5 @@
 # Handoff
-_Updated 2026-11-02 · branch `claude/emissions-mapper-review-7e779c` · PR not opened yet (public repo, needs Graham's OK)_
+_Updated 2026-11-02 · branch `feat/comparison-table` · PR not opened yet (public repo, needs Graham's OK)_
 
 ## Goal
 Publish the emissions mapper as a public GitHub Pages site, review it, restyle it in Signal, and fix the review's findings.
@@ -18,11 +18,12 @@ Publish the emissions mapper as a public GitHub Pages site, review it, restyle i
   - duplicate handlers removed
   - a Heat toggle
 
-  Verified locally (Chrome-based browser pane, desktop width). Not checked on a phone.
+  Merged in PR 4.
+- Ranked comparison table (product suggestion 3) on `feat/comparison-table`. Verified locally at 1280px and 375px.
 
 ## Next
-- Push the branch and open its PR (needs Graham's OK: public repo).
-- Product backlog in `docs/REVIEW.md`. Suggested order: 3 (ranked comparison table), 10 (pan to selection and label collisions, now worse with 90 airports), 4 (method note), 6, 7.
+- Push `feat/comparison-table` and open its PR (needs Graham's OK: public repo).
+- Product backlog in `docs/REVIEW.md`. Suggested order: 10 (pan to selection and label collisions, now worse with 90 airports), 4 (method note), 7 (export the table as CSV), 6.
 
 ## Open decisions (need Graham)
 - Which product suggestions to build next, and in what order.
@@ -35,7 +36,7 @@ See `docs/DECISIONS.md`.
 - ES modules need the local server. `file://` won't work.
 
 ## State
-`main` is live on GitHub Pages. The review-fix branch is local only.
+`main` is live on GitHub Pages and includes the review fixes. `feat/comparison-table` is local only.
 
 ## Prompt for the next session
 Read AGENTS.md, docs/DECISIONS.md and docs/REVIEW.md first, in /Users/graham/Projects/EmissionsMapper. Then build the next product suggestions from REVIEW.md.

@@ -152,26 +152,32 @@
 
       <section class="map-stage" aria-label="World emissions map">
         <div class="map-toolbar">
-          <div class="segmented" role="group" aria-label="Map layers">
-            <button id="heatToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Heat</button>
-            <button id="jetlagToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Jetlag</button>
-            <button id="routesToggle" class="sg-btn sg-btn--sm sg-btn--secondary" type="button" aria-pressed="false">Routes</button>
+          <div class="sg-tabs view-tabs" role="tablist" aria-label="View">
+            <button class="sg-tab" id="mapTab" type="button" role="tab" aria-selected="true" aria-controls="mapPanel" tabindex="0">Map</button>
+            <button class="sg-tab" id="tableTab" type="button" role="tab" aria-selected="false" aria-controls="tablePanel" tabindex="-1">Table</button>
           </div>
-          <div class="legend">
-            <span class="sg-label">Lower</span>
-            <span class="legend-swatches" aria-hidden="true">
-              <span class="swatch swatch-1"></span>
-              <span class="swatch swatch-2"></span>
-              <span class="swatch swatch-3"></span>
-              <span class="swatch swatch-4"></span>
-            </span>
-            <span class="sg-label">Higher</span>
-            <span class="hatch-key" aria-hidden="true"></span>
-            <span class="sg-label">High jetlag</span>
+          <div class="map-controls" id="mapControls">
+            <div class="segmented" role="group" aria-label="Map layers">
+              <button id="heatToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Heat</button>
+              <button id="jetlagToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Jetlag</button>
+              <button id="routesToggle" class="sg-btn sg-btn--sm sg-btn--secondary" type="button" aria-pressed="false">Routes</button>
+            </div>
+            <div class="legend">
+              <span class="sg-label">Lower</span>
+              <span class="legend-swatches" aria-hidden="true">
+                <span class="swatch swatch-1"></span>
+                <span class="swatch swatch-2"></span>
+                <span class="swatch swatch-3"></span>
+                <span class="swatch swatch-4"></span>
+              </span>
+              <span class="sg-label">Higher</span>
+              <span class="hatch-key" aria-hidden="true"></span>
+              <span class="sg-label">High jetlag</span>
+            </div>
           </div>
         </div>
 
-        <div class="map-wrap">
+        <div class="map-wrap" id="mapPanel" role="tabpanel" aria-labelledby="mapTab">
           <div
             id="worldMap"
             role="region"
@@ -188,6 +194,13 @@
             </dl>
             <div class="top-drivers" id="topDrivers"></div>
           </div>
+        </div>
+
+        <div class="table-panel" id="tablePanel" role="tabpanel" aria-labelledby="tableTab" tabindex="-1" hidden>
+          <h2 class="table-title" id="tableTitle">Candidate host cities, ranked by total flight emissions</h2>
+          <p class="table-meta" id="tableMeta"></p>
+          <div class="table-scroll" id="tableScroll" tabindex="0" role="region" aria-labelledby="tableTitle"></div>
+          <div class="table-actions"><button class="sg-btn sg-btn--sm sg-btn--secondary" id="tableToggle" type="button" hidden></button></div>
         </div>
       </section>
     </main>

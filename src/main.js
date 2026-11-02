@@ -1,3 +1,8 @@
+// Heat and marker colours, lowest to highest emissions. These mirror Signal's tokens
+// (green-500, amber-500, red-500, red-800); Leaflet needs literal colours, so they live here.
+// Keep the legend swatches in src/styles.css in step.
+const DATA_COLOURS = ["#1fe070", "#ffb000", "#ff3b1f", "#8f1a08"];
+
 const AIRPORTS = [
   { code: "ATL", city: "Atlanta", country: "United States", lat: 33.64, lon: -84.43, tz: -5 },
   { code: "JFK", city: "New York", country: "United States", lat: 40.64, lon: -73.78, tz: -5 },
@@ -280,10 +285,10 @@ function formatHours(hours) {
 
 function colorForScore(score, min, max) {
   const ratio = max === min ? 0 : (score.totalEmissionsKg - min) / (max - min);
-  if (ratio < 0.33) return "#147d64";
-  if (ratio < 0.62) return "#dd9f2c";
-  if (ratio < 0.82) return "#d85f45";
-  return "#7a4c73";
+  if (ratio < 0.33) return DATA_COLOURS[0];
+  if (ratio < 0.62) return DATA_COLOURS[1];
+  if (ratio < 0.82) return DATA_COLOURS[2];
+  return DATA_COLOURS[3];
 }
 
 function initMap() {
@@ -319,6 +324,12 @@ function initMap() {
   requestAnimationFrame(() => state.map.invalidateSize());
 }
 
+const CONFIDENCE_TAGS = {
+  high: "sg-tag sg-tag--muted",
+  medium: "sg-tag sg-tag--warning",
+  low: "sg-tag sg-tag--danger"
+};
+
 function renderReview() {
   els.reviewList.innerHTML = "";
   if (!state.groups.length) {
@@ -333,13 +344,16 @@ function renderReview() {
       const selected = airport.code === group.airportCode ? "selected" : "";
       return `<option value="${airport.code}" ${selected}>${airport.city}, ${airport.country} (${airport.code})</option>`;
     }).join("");
+    const confidenceTag = CONFIDENCE_TAGS[group.confidence] || CONFIDENCE_TAGS.high;
     row.innerHTML = `
-      <strong>${escapeHtml(group.inputLocation)}</strong>
-      <div class="review-meta">
-        <span>${group.people} people</span>
-        <span class="confidence ${group.confidence}">${group.confidence}</span>
+      <div class="review-head">
+        <div class="review-place">
+          <strong>${escapeHtml(group.inputLocation)}</strong>
+          <span class="review-people">${group.people} people</span>
+        </div>
+        <span class="${confidenceTag}">${escapeHtml(group.confidence)}</span>
       </div>
-      <select aria-label="Assumed airport for ${escapeHtml(group.inputLocation)}">${options}</select>
+      <select class="sg-select" aria-label="Assumed airport for ${escapeHtml(group.inputLocation)}">${options}</select>
     `;
     const select = row.querySelector("select");
     select.addEventListener("change", () => {
@@ -420,7 +434,7 @@ function renderRoutes() {
     window.L.polyline(route, {
       pane: "routePane",
       className: "route-line",
-      color: "#12384a",
+      color: "#0e0e0c",
       dashArray: index < 4 ? "" : "6 7",
       opacity: 0.84,
       weight
@@ -430,7 +444,7 @@ function renderRoutes() {
       pane: "routePane",
       className: "route-origin",
       color: "#ffffff",
-      fillColor: "#12384a",
+      fillColor: "#0e0e0c",
       fillOpacity: 0.9,
       opacity: 0.95,
       radius: 4,
@@ -678,6 +692,8 @@ function wireEvents() {
     button.addEventListener("click", () => {
       state.layers[key] = !state.layers[key];
       button.classList.toggle("active", state.layers[key]);
+      button.classList.toggle("sg-btn--ink", state.layers[key]);
+      button.setAttribute("aria-pressed", String(state.layers[key]));
       renderMap();
       renderSelected();
     });

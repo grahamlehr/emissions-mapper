@@ -1,0 +1,35 @@
+/* Signal, Graham's design system: copied from ~/Documents/Signal Design System on 2026-11-02. Change it there first, then copy it here. */
+/* Signal — type. One neo-grotesk (Geist) + its mono for labels, numbers and metadata. */
+:root {
+  --font-sans: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Scale (px) — a stepped modular scale, not fluid */
+  --text-display-xl: 120px;
+  --text-display: 80px;
+  --text-h1: 56px;
+  --text-h2: 40px;
+  --text-h3: 28px;
+  --text-h4: 20px;
+  --text-lead: 20px;
+  --text-body: 16px;
+  --text-small: 14px;
+  --text-meta: 12px;
+  --text-micro: 11px;
+
+  --leading-tight: 0.95;
+  --leading-heading: 1.08;
+  --leading-body: 1.5;
+
+  --tracking-display: -0.045em;
+  --tracking-heading: -0.025em;
+  --tracking-body: -0.005em;
+  --tracking-label: 0.06em;
+}

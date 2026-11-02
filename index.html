@@ -1,15 +1,25 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Event Flight Emissions Mapper</title>
+    <title>Flight emissions mapper</title>
+    <meta
+      name="description"
+      content="Compare the carbon and jetlag cost of candidate host cities for an event, using your own attendee spreadsheet, all inside your browser."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231FE070'/%3E%3C/svg%3E"
+    />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIINfQTo3c81hZ1oA2Z7S4Qb0b5mVhWQ6zU="
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""
     />
+    <link rel="stylesheet" href="src/styles/signal/index.css" />
     <link rel="stylesheet" href="src/styles.css" />
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -24,87 +34,106 @@
     <main class="app-shell">
       <aside class="control-panel" aria-label="Planning controls">
         <section class="brand-block">
-          <p class="eyebrow">Event planning tool</p>
-          <h1>Flight emissions mapper</h1>
-          <p>
-            Add attendee locations, tune the travel policy, and compare the carbon
-            and jetlag impact of potential host cities. All data stays on your local browser. Use for comparing relative carbon impacts to guide conversations rather than as a post event reporting tool.
+          <p class="sg-label">Event planning tool</p>
+          <h1 class="brand">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <span>Flight emissions mapper</span>
+          </h1>
+          <p class="brand-intro">
+            Add where attendees are travelling from, set a travel policy, and compare the carbon and jetlag cost of each possible host city. Your file stays in your browser. Use it to compare options, not for post-event reporting.
           </p>
         </section>
 
-        <section class="panel-section">
-          <div class="section-heading">
-            <h2>Attendees</h2>
-            <button class="ghost-button" id="loadDemoButton" type="button">Demo</button>
-          </div>
+        <section class="panel-section" aria-labelledby="attendeesTitle">
+          <header class="sg-section panel-head">
+            <span class="sg-index">01</span>
+            <h2 id="attendeesTitle">Attendees</h2>
+            <button class="sg-btn sg-btn--secondary sg-btn--sm" id="loadDemoButton" type="button">Load demo</button>
+          </header>
           <label class="upload-zone" for="attendeeFile">
             <span class="upload-title">Upload Excel or CSV</span>
-            <span class="upload-help">Columns: location, country, people, optional airport</span>
+            <span class="sg-field__hint">Columns: location, country, people, optional airport</span>
             <input id="attendeeFile" type="file" accept=".xlsx,.xls,.csv,.tsv" />
           </label>
           <div class="message" id="fileMessage" role="status"></div>
         </section>
 
-        <section class="panel-section">
-          <div class="section-heading">
-            <h2>Travel policy</h2>
-            <span class="pill" id="policyValue">6 h</span>
-          </div>
+        <section class="panel-section" aria-labelledby="policyTitle">
+          <header class="sg-section panel-head">
+            <span class="sg-index">02</span>
+            <h2 id="policyTitle">Travel policy</h2>
+            <span class="sg-tag sg-tag--plain" id="policyValue">6 h</span>
+          </header>
           <label class="slider-label" for="businessThreshold">
             Assume business class over <strong id="policyText">6 hours</strong>
           </label>
           <input id="businessThreshold" type="range" min="2" max="14" step="1" value="6" />
           <div class="policy-grid">
-            <label>
-              Economy kg CO2e / pax-km
-              <input id="economyFactor" type="number" min="0.01" max="1" step="0.005" value="0.115" />
-            </label>
-            <label>
-              Business multiplier
-              <input id="businessMultiplier" type="number" min="1" max="8" step="0.1" value="2.8" />
-            </label>
+            <div class="sg-field">
+              <label class="sg-label" for="economyFactor">kg CO2e per pax-km</label>
+              <input class="sg-input" id="economyFactor" type="number" min="0.01" max="1" step="0.005" value="0.115" />
+            </div>
+            <div class="sg-field">
+              <label class="sg-label" for="businessMultiplier">Business multiplier</label>
+              <input class="sg-input" id="businessMultiplier" type="number" min="1" max="8" step="0.1" value="2.8" />
+            </div>
           </div>
-          <label class="toggle-row">
-            <input id="nonCo2Toggle" type="checkbox" checked />
-            <span class="tooltip" tabindex="0" aria-describedby="nonCo2Tooltip">
-              Include non-CO2 uplift
-              <span class="tooltip-bubble" id="nonCo2Tooltip" role="tooltip">
-                Multiplies flight CO2 by 1.9 to approximate wider aviation climate effects such as contrails, nitrogen oxides, and high-altitude impacts.
-              </span>
+          <div class="switch-row">
+            <label class="sg-switch">
+              <input type="checkbox" role="switch" id="nonCo2Toggle" checked />
+              <span class="sg-switch__track"></span>
+              <span>Include non-CO2 uplift</span>
+            </label>
+            <button
+              class="sg-btn sg-btn--ghost sg-btn--icon sg-btn--sm info-button"
+              type="button"
+              aria-label="What is non-CO2 uplift?"
+              aria-describedby="nonCo2Tooltip"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+            </button>
+            <span class="popover" id="nonCo2Tooltip" role="tooltip">
+              Multiplies flight CO2 by 1.9 to approximate wider aviation climate effects such as contrails, nitrogen oxides, and high-altitude impacts.
             </span>
-          </label>
+          </div>
         </section>
 
-        <section class="panel-section compact">
-          <div class="section-heading">
-            <h2>Summary</h2>
-            <span class="pill muted" id="groupCount">0 groups</span>
-          </div>
+        <section class="panel-section" aria-labelledby="summaryTitle">
+          <header class="sg-section panel-head">
+            <span class="sg-index">03</span>
+            <h2 id="summaryTitle">Summary</h2>
+            <span class="sg-tag sg-tag--muted" id="groupCount">0 groups</span>
+          </header>
           <div class="metrics-grid">
             <div>
-              <span>Total people</span>
+              <span class="sg-label">Total people</span>
               <strong id="peopleCount">0</strong>
             </div>
             <div>
-              <span>Best option</span>
+              <span class="sg-label">Best option</span>
               <strong id="bestCity">-</strong>
             </div>
             <div>
-              <span>Lowest footprint</span>
+              <span class="sg-label">Lowest footprint</span>
               <strong id="bestEmissions">-</strong>
             </div>
             <div>
-              <span>Severe jetlag area</span>
+              <span class="sg-label">Severe jetlag area</span>
               <strong id="jetlagShare">-</strong>
             </div>
           </div>
         </section>
 
-        <section class="panel-section review-section">
-          <div class="section-heading">
-            <h2>Airport assumptions</h2>
-            <span class="pill muted">editable</span>
-          </div>
+        <section class="panel-section review-section" aria-labelledby="reviewTitle">
+          <header class="sg-section panel-head">
+            <span class="sg-index">04</span>
+            <h2 id="reviewTitle">Airport assumptions</h2>
+            <span class="sg-tag sg-tag--muted">editable</span>
+          </header>
           <div class="review-list" id="reviewList"></div>
         </section>
       </aside>
@@ -112,32 +141,37 @@
       <section class="map-stage" aria-label="World emissions map">
         <div class="map-toolbar">
           <div class="segmented" role="group" aria-label="Map layers">
-            <button id="jetlagToggle" class="active" type="button">Jetlag</button>
-            <button id="routesToggle" type="button">Routes</button>
+            <button id="jetlagToggle" class="sg-btn sg-btn--sm sg-btn--secondary sg-btn--ink active" type="button" aria-pressed="true">Jetlag</button>
+            <button id="routesToggle" class="sg-btn sg-btn--sm sg-btn--secondary" type="button" aria-pressed="false">Routes</button>
           </div>
           <div class="legend">
-            <span class="legend-item low">Lower</span>
-            <span class="legend-ramp" aria-hidden="true"></span>
-            <span class="legend-item high">Higher</span>
+            <span class="sg-label">Lower</span>
+            <span class="legend-swatches" aria-hidden="true">
+              <span class="swatch swatch-1"></span>
+              <span class="swatch swatch-2"></span>
+              <span class="swatch swatch-3"></span>
+              <span class="swatch swatch-4"></span>
+            </span>
+            <span class="sg-label">Higher</span>
             <span class="hatch-key" aria-hidden="true"></span>
-            <span>High jetlag</span>
+            <span class="sg-label">High jetlag</span>
           </div>
         </div>
 
         <div class="map-wrap">
           <div
             id="worldMap"
-            role="img"
+            role="region"
             aria-label="OpenStreetMap world map with emissions heat, jetlag hatching, routes, and candidate destinations"
           ></div>
-          <div class="destination-card" id="destinationCard">
-            <span class="card-kicker">Selected destination</span>
+          <div class="destination-card sg-card sg-card--boxed" id="destinationCard">
+            <span class="card-kicker sg-label">Selected destination</span>
             <h2 id="selectedName">Click a city</h2>
             <dl>
-              <div><dt>Total emissions</dt><dd id="selectedEmissions">-</dd></div>
-              <div><dt>Per person</dt><dd id="selectedPerPerson">-</dd></div>
-              <div><dt>Avg flight</dt><dd id="selectedFlight">-</dd></div>
-              <div><dt>Jetlag score</dt><dd id="selectedJetlag">-</dd></div>
+              <div><dt class="sg-label">Total emissions</dt><dd id="selectedEmissions">-</dd></div>
+              <div><dt class="sg-label">Per person</dt><dd id="selectedPerPerson">-</dd></div>
+              <div><dt class="sg-label">Avg flight</dt><dd id="selectedFlight">-</dd></div>
+              <div><dt class="sg-label">Jetlag score</dt><dd id="selectedJetlag">-</dd></div>
             </dl>
             <div class="top-drivers" id="topDrivers"></div>
           </div>

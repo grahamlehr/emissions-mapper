@@ -90,7 +90,7 @@ The review panel shows how each match was made, for example "Leiden → AMS (Ams
 
 The plan, and the scoring rules for C, are written by Opus. The build script, the loader and the UI are implemented by Sonnet subagents. I verify the result each time.
 
-## Decisions needed (Graham)
+## Decisions (agreed with Graham on 2026-11-03: all seven recommendations)
 1. **Data sources.** Options: OurAirports + GeoNames, or OpenFlights (whose data is frozen since 2017 and under ODbL share-alike). *Recommend OurAirports + GeoNames.*
 2. **Which airports.** Options: large and medium airports with scheduled service, or small ones too. *Recommend large and medium.* The nearest-airport rule prefers large ones anyway, and small airfields add noise.
 3. **Gazetteer size.** Options: GeoNames `cities15000` (about 26,000 places), `cities5000` (about 50,000) or `cities1000` (about 140,000). *Recommend starting with `cities15000` plus airport towns*, then stepping up to `cities5000` if the golden set shows misses.

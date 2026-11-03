@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { DEFAULT_POLICY, SAMPLE_ROWS, assumptionLines, buildGroups, comparisonCsv, scoreAll } from "../src/model.js";
+import { AIRPORTS, DEFAULT_POLICY, SAMPLE_ROWS, assumptionLines, buildGroups, comparisonCsv, scoreAll } from "../src/model.js";
 
 const HEADER =
   "Rank,City,Country,Airport,Total t CO2,Per person t CO2,Avg flight h,Avg jetlag h,Share with 6h+ jetlag %,Share in business class %";
@@ -72,7 +72,8 @@ test("assumptionLines describes the default policy", () => {
     "Non-CO2 uplift ×1.7",
     "Factors: DESNZ 2026",
     "Distance +8%",
-    "101 people in 6 groups placed; 0 groups not placed"
+    "101 people in 6 groups placed; 0 groups not placed",
+    `Host cities: all ${AIRPORTS.length}`
   ]);
 });
 
@@ -91,6 +92,17 @@ test("assumptionLines reflects one-way, no uplift, custom factors and singular c
     "Non-CO2 off",
     "Factors: custom",
     "Distance +8%",
-    "1 person in 1 group placed; 1 group not placed"
+    "1 person in 1 group placed; 1 group not placed",
+    `Host cities: all ${AIRPORTS.length}`
   ]);
+});
+
+test("assumptionLines names the shortlist when one is in use", () => {
+  const out = assumptionLines(DEFAULT_POLICY, {
+    placedPeople: 5,
+    placedGroups: 2,
+    unplacedGroups: 0,
+    shortlist: ["Lisbon", "Madrid", "Paris"]
+  });
+  assert.equal(out.at(-1), "Host cities: shortlist of 3 (Lisbon, Madrid, Paris)");
 });

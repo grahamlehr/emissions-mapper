@@ -132,9 +132,38 @@
           </div>
         </section>
 
-        <section class="panel-section" aria-labelledby="summaryTitle">
+        <section class="panel-section" aria-labelledby="hostTitle">
           <header class="sg-section panel-head">
             <span class="sg-index">03</span>
+            <h2 id="hostTitle">Host cities</h2>
+            <span class="sg-tag sg-tag--plain" id="hostValue">All 90</span>
+          </header>
+          <form class="shortlist-form" id="shortlistForm" novalidate>
+            <div class="sg-field">
+              <label class="sg-label" for="shortlistInput">Add a host city</label>
+              <div class="shortlist-entry">
+                <input class="sg-input" id="shortlistInput" type="text" list="shortlistOptions" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="shortlistHint shortlistMessage" />
+                <button class="sg-btn sg-btn--sm sg-btn--secondary" type="submit">Add</button>
+              </div>
+              <span class="sg-field__hint" id="shortlistHint">City name or airport code, e.g. Lisbon or LIS</span>
+              <datalist id="shortlistOptions"></datalist>
+            </div>
+          </form>
+          <div class="message" id="shortlistMessage" role="status"></div>
+          <p class="sg-field__hint" id="shortlistEmpty">Add 2 to 5 cities you're considering to compare only those. Otherwise every city in the list is ranked.</p>
+          <ul class="shortlist-chips" id="shortlistChips" aria-label="Shortlisted host cities"></ul>
+          <div class="switch-row">
+            <label class="sg-switch">
+              <input type="checkbox" role="switch" id="shortlistOnlyToggle" disabled />
+              <span class="sg-switch__track"></span>
+              <span>Compare shortlist only</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel-section" aria-labelledby="summaryTitle">
+          <header class="sg-section panel-head">
+            <span class="sg-index">04</span>
             <h2 id="summaryTitle">Summary</h2>
             <span class="sg-tag sg-tag--muted" id="groupCount">0 groups</span>
           </header>
@@ -161,7 +190,7 @@
 
         <section class="panel-section review-section" aria-labelledby="reviewTitle">
           <header class="sg-section panel-head">
-            <span class="sg-index">04</span>
+            <span class="sg-index">05</span>
             <h2 id="reviewTitle">Airport assumptions</h2>
             <span class="sg-tag sg-tag--muted">editable</span>
           </header>
@@ -171,7 +200,7 @@
 
         <section class="panel-section method-section" aria-labelledby="methodTitle">
           <header class="sg-section panel-head">
-            <span class="sg-index">05</span>
+            <span class="sg-index">06</span>
             <h2 id="methodTitle">How this is calculated</h2>
             <span class="sg-tag sg-tag--muted">DESNZ 2026</span>
           </header>
@@ -235,6 +264,7 @@
           <div class="destination-card sg-card sg-card--boxed" id="destinationCard">
             <span class="card-kicker sg-label">Selected destination</span>
             <h2 id="selectedName">Click a city</h2>
+            <button class="sg-btn sg-btn--sm sg-btn--secondary shortlist-toggle" id="shortlistToggle" type="button" aria-pressed="false" hidden>Add to shortlist</button>
             <dl>
               <div><dt class="sg-label">Total emissions</dt><dd id="selectedEmissions">-</dd></div>
               <div><dt class="sg-label">Per person</dt><dd id="selectedPerPerson">-</dd></div>

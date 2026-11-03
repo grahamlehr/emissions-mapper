@@ -5,7 +5,9 @@ import {
   DESNZ_2026,
   SAMPLE_ROWS,
   assumptionLines,
+  airportByCode,
   comparisonCsv,
+  findAirport,
   buildGroups,
   normalizeImportedRow,
   normalize,
@@ -24,6 +26,8 @@ const state = {
   groups: [],
   scores: [],
   selectedCode: "AMS",
+  shortlist: { codes: [], only: false },
+  fittedShortlist: "",
   mapReady: false,
   map: null,
   mapLayers: {
@@ -44,6 +48,40 @@ const state = {
 };
 
 const TABLE_LIMIT = 10;
+
+// Holds shortlisted airport codes and the "only" switch, never attendee data.
+const SHORTLIST_KEY = "emissionsMapper.shortlist";
+
+function loadShortlist() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SHORTLIST_KEY));
+    if (!saved || !Array.isArray(saved.codes)) return;
+    const codes = [];
+    for (const code of saved.codes) {
+      if (typeof code === "string" && airportByCode(code) && !codes.includes(code)) codes.push(code);
+    }
+    state.shortlist.codes = codes;
+    state.shortlist.only = Boolean(saved.only) && codes.length > 0;
+  } catch {
+    // Storage can be blocked or hold junk; start with an empty shortlist.
+  }
+}
+
+function saveShortlist() {
+  try {
+    localStorage.setItem(SHORTLIST_KEY, JSON.stringify({ codes: state.shortlist.codes, only: state.shortlist.only }));
+  } catch {
+    // Not being able to remember the shortlist is not worth interrupting anyone for.
+  }
+}
+
+function isFiltering() {
+  return state.shortlist.only && state.shortlist.codes.length > 0;
+}
+
+function shortlistCityNames() {
+  return isFiltering() ? state.shortlist.codes.map((code) => airportByCode(code).city) : [];
+}
 
 // Columns of the comparison table. `text` columns sort A to Z first; numbers sort lowest first.
 const TABLE_COLUMNS = [
@@ -101,8 +139,20 @@ const els = {
   downloadPng: document.querySelector("#downloadPng"),
   printTable: document.querySelector("#printTable"),
   printDate: document.querySelector("#printDate"),
-  printAssumptions: document.querySelector("#printAssumptions")
+  printAssumptions: document.querySelector("#printAssumptions"),
+  shortlistForm: document.querySelector("#shortlistForm"),
+  shortlistInput: document.querySelector("#shortlistInput"),
+  shortlistOptions: document.querySelector("#shortlistOptions"),
+  shortlistMessage: document.querySelector("#shortlistMessage"),
+  shortlistEmpty: document.querySelector("#shortlistEmpty"),
+  shortlistChips: document.querySelector("#shortlistChips"),
+  shortlistOnly: document.querySelector("#shortlistOnlyToggle"),
+  hostValue: document.querySelector("#hostValue"),
+  shortlistToggle: document.querySelector("#shortlistToggle"),
+  tableTitle: document.querySelector("#tableTitle")
 };
+
+const DEFAULT_TABLE_TITLE = "Candidate host cities, ranked by total flight emissions";
 
 // Factor inputs hold g CO2 per passenger-km and carry a path such as "shortHaul.economy".
 function factorPath(input) {
@@ -161,7 +211,9 @@ function placedGroups() {
 
 // With nothing placed there is nothing to rank, so the scores stay empty.
 function calculateScores() {
-  state.scores = placedGroups().length ? scoreAll(state.groups, getPolicy()) : [];
+  state.scores = placedGroups().length
+    ? scoreAll(state.groups, getPolicy(), isFiltering() ? state.shortlist.codes : undefined)
+    : [];
   if (state.scores.length && !state.scores.some((score) => score.destination.code === state.selectedCode)) {
     state.selectedCode = state.scores[0].destination.code;
   }
@@ -240,6 +292,33 @@ function revealSelected({ animate = true } = {}) {
   state.map.panInside([selected.destination.lat, selected.destination.lon], {
     paddingTopLeft: padding.topLeft,
     paddingBottomRight: [padding.bottomRight[0] + 40, padding.bottomRight[1]],
+    animate: animate && !reducedMotion.matches
+  });
+}
+
+// Zooms the map to the shortlisted cities whenever the set being compared changes, keeping
+// them clear of the destination card. Waits until the map is visible (not in Table view).
+function fitShortlist({ animate = true } = {}) {
+  if (!state.mapReady || els.mapPanel.hidden) return;
+  const key = isFiltering() ? state.shortlist.codes.join(",") : "";
+  if (key === state.fittedShortlist) return;
+  state.fittedShortlist = key;
+  if (!key) return;
+  const container = els.map.getBoundingClientRect();
+  if (!container.width || !container.height) return;
+  const padding = panPadding(container, els.destinationCard.getBoundingClientRect());
+  // Clearing the card both ways leaves too small a box, so fit the cities into whichever is
+  // bigger: the strip left of the card or the strip above it. The extra 40 px is label room.
+  const [edge] = padding.topLeft;
+  const right = padding.bottomRight[0] + 40;
+  const bottom = padding.bottomRight[1];
+  const leftStrip = (container.width - edge - right) * (container.height - 2 * edge);
+  const topStrip = (container.width - edge - 40) * (container.height - edge - bottom);
+  const points = state.scores.map((score) => [score.destination.lat, score.destination.lon]);
+  state.map.fitBounds(points, {
+    paddingTopLeft: padding.topLeft,
+    paddingBottomRight: leftStrip >= topStrip ? [right, edge] : [40, bottom],
+    maxZoom: 5,
     animate: animate && !reducedMotion.matches
   });
 }
@@ -509,7 +588,7 @@ function renderAirports(min, max) {
       pane: "airportPane",
       title: `${score.destination.city} (${score.destination.code})`,
       icon: window.L.divIcon({
-        className: `airport-marker ${isSelected ? "selected" : ""}`,
+        className: `airport-marker ${isSelected ? "selected" : ""} ${!isFiltering() && state.shortlist.codes.includes(score.destination.code) ? "shortlisted" : ""}`,
         html: `<span class="airport-dot" style="--marker-color: ${fill}"></span><span class="airport-code">${score.destination.code}</span>`,
         iconSize: [58, 28],
         iconAnchor: [9, 14]
@@ -561,6 +640,7 @@ function renderSelected() {
     state.scores.find((score) => score.destination.code === state.selectedCode) ||
     state.scores[0];
   if (!selected) {
+    els.shortlistToggle.hidden = true;
     els.selectedName.textContent = "No groups placed yet";
     for (const el of [els.selectedEmissions, els.selectedPerPerson, els.selectedFlight, els.selectedJetlag]) {
       el.textContent = "-";
@@ -569,6 +649,10 @@ function renderSelected() {
     return;
   }
   state.selectedCode = selected.destination.code;
+  const onShortlist = state.shortlist.codes.includes(selected.destination.code);
+  els.shortlistToggle.hidden = false;
+  els.shortlistToggle.setAttribute("aria-pressed", String(onShortlist));
+  els.shortlistToggle.textContent = onShortlist ? "On shortlist \u2713" : "Add to shortlist";
   els.selectedName.textContent = `${selected.destination.city}, ${selected.destination.country}`;
   els.selectedEmissions.textContent = formatTonnes(selected.totalEmissionsKg);
   els.selectedPerPerson.textContent = formatTonnes(selected.averageEmissionsKg);
@@ -596,9 +680,10 @@ function renderTable() {
   const people = scores.length ? scores[0].totalPeople : 0;
   const hours = policy.threshold;
   els.tableMeta.textContent = scores.length
-    ? `${plural(people, "attendee", "attendees")} placed \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 ${els.nonCo2.checked ? `non-CO2 \u00d7${DESNZ_2026.nonCo2Multiplier}` : "non-CO2 off"}${factorsAreCustom(policy.factors) ? " \u00b7 custom factors" : ""}`
+    ? `${plural(people, "attendee", "attendees")} placed${isFiltering() ? ` \u00b7 shortlist of ${state.shortlist.codes.length}` : ""} \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 ${els.nonCo2.checked ? `non-CO2 \u00d7${DESNZ_2026.nonCo2Multiplier}` : "non-CO2 off"}${factorsAreCustom(policy.factors) ? " \u00b7 custom factors" : ""}`
     : "";
 
+  els.tableTitle.textContent = isFiltering() ? "Your shortlist, ranked by total flight emissions" : DEFAULT_TABLE_TITLE;
   els.downloadCsv.disabled = !scores.length;
   els.printTable.disabled = !scores.length;
   if (!state.exporting) els.downloadPng.disabled = !scores.length;
@@ -607,7 +692,8 @@ function renderTable() {
     ? assumptionLines(policy, {
         placedPeople: people,
         placedGroups: placedGroups().length,
-        unplacedGroups: state.groups.length - placedGroups().length
+        unplacedGroups: state.groups.length - placedGroups().length,
+        shortlist: shortlistCityNames()
       })
         .map((line) => `<li>${escapeHtml(line)}</li>`)
         .join("")
@@ -641,7 +727,7 @@ function renderTable() {
       const selected = d.code === state.selectedCode;
       return `<tr class="${selected ? "selected" : ""}" data-code="${d.code}" tabindex="0"${selected ? ` aria-current="true"` : ""}>
         <td class="num">${rank.get(d.code)}</td>
-        <td><span class="city-name">${escapeHtml(d.city)}</span>, ${escapeHtml(d.country)} <span class="city-code">${d.code}</span></td>
+        <td><span class="city-name">${escapeHtml(d.city)}</span>, ${escapeHtml(d.country)} <span class="city-code">${d.code}</span>${!isFiltering() && state.shortlist.codes.includes(d.code) ? ` <span class="sg-tag sg-tag--muted shortlist-tag">Shortlist</span>` : ""}</td>
         <td class="num">${formatTonnes(score.totalEmissionsKg)}</td>
         <td class="num">${formatTonnes(score.averageEmissionsKg)}</td>
         <td class="num">${formatHours(score.averageHours)}</td>
@@ -751,7 +837,8 @@ async function downloadComparisonPng() {
       policyLines: assumptionLines(policy, {
         placedPeople: people,
         placedGroups: placed.length,
-        unplacedGroups: state.groups.length - placed.length
+        unplacedGroups: state.groups.length - placed.length,
+        shortlist: shortlistCityNames()
       }),
       colourFor: (score) => colorForScore(score, min, max),
       radiusFor: (score) => airportRadiusMetres(score, min, max),
@@ -763,6 +850,7 @@ async function downloadComparisonPng() {
         : [],
       dataColours: DATA_COLOURS,
       formatTonnes,
+      tableTitle: isFiltering() ? "Your shortlist by total flight emissions" : undefined,
       date: new Date()
     });
     const url = URL.createObjectURL(blob);
@@ -850,6 +938,7 @@ function setView(view, { focus = false } = {}) {
   } else if (state.mapReady) {
     state.map.invalidateSize();
     renderMap();
+    fitShortlist();
     if (state.pendingReveal) {
       state.pendingReveal = false;
       revealSelected();
@@ -887,14 +976,96 @@ function renderMethod(policy) {
     : "One-way journeys are counted. Switch on Return trips to count both ways (\u00d72).";
 }
 
+const SHORTLIST_OPTIONS = [...AIRPORTS]
+  .sort((a, b) => a.city.localeCompare(b.city))
+  .map((airport) => ({ airport, label: `${airport.city}, ${airport.country} (${airport.code})` }));
+
+function fillShortlistOptions() {
+  for (const { label } of SHORTLIST_OPTIONS) {
+    const option = document.createElement("option");
+    option.value = label;
+    els.shortlistOptions.append(option);
+  }
+}
+
+// Updates everything about the shortlist except the input, so typing is never interrupted.
+function renderShortlist() {
+  const { codes, only } = state.shortlist;
+  els.hostValue.textContent = isFiltering() ? `Shortlist \u00b7 ${codes.length}` : `All ${AIRPORTS.length}`;
+  els.shortlistEmpty.hidden = codes.length > 0;
+  els.shortlistOnly.disabled = codes.length === 0;
+  els.shortlistOnly.checked = only && codes.length > 0;
+  els.shortlistChips.replaceChildren(
+    ...codes.map((code) => {
+      const airport = airportByCode(code);
+      const item = document.createElement("li");
+      item.className = "shortlist-chip";
+      const name = document.createElement("span");
+      name.append(`${airport.city} `);
+      const codeEl = document.createElement("span");
+      codeEl.className = "city-code";
+      codeEl.textContent = code;
+      name.append(codeEl);
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.dataset.code = code;
+      remove.setAttribute("aria-label", `Remove ${airport.city} from shortlist`);
+      remove.textContent = "\u00d7";
+      item.append(name, remove);
+      return item;
+    })
+  );
+}
+
+function addToShortlist(code) {
+  const { shortlist } = state;
+  if (shortlist.codes.includes(code)) return false;
+  shortlist.codes.push(code);
+  if (shortlist.codes.length === 1) shortlist.only = true;
+  saveShortlist();
+  updateAll();
+  return true;
+}
+
+function removeFromShortlist(code) {
+  const { shortlist } = state;
+  const index = shortlist.codes.indexOf(code);
+  if (index < 0) return;
+  shortlist.codes.splice(index, 1);
+  if (!shortlist.codes.length) shortlist.only = false;
+  saveShortlist();
+  updateAll();
+}
+
+function submitShortlist() {
+  const value = els.shortlistInput.value.trim();
+  if (!value) return;
+  const listed = SHORTLIST_OPTIONS.find((option) => option.label.toLowerCase() === value.toLowerCase());
+  const codeInLabel = value.match(/\(([A-Za-z]{3})\)\s*$/);
+  const airport = (codeInLabel && airportByCode(codeInLabel[1].toUpperCase())) || listed?.airport || findAirport(value);
+  if (!airport) {
+    els.shortlistMessage.textContent = `Couldn't find "${value}". Pick a city from the list.`;
+    return;
+  }
+  if (state.shortlist.codes.includes(airport.code)) {
+    els.shortlistMessage.textContent = `${airport.city} is already on the shortlist.`;
+    return;
+  }
+  els.shortlistMessage.textContent = "";
+  els.shortlistInput.value = "";
+  addToShortlist(airport.code);
+}
+
 function updateAll() {
   updatePolicyCopy();
   calculateScores();
+  renderShortlist();
   renderNotices();
   renderSummary();
   if (state.mapReady) state.map.invalidateSize();
   renderMap();
   renderSelected();
+  fitShortlist();
   renderTable();
 }
 
@@ -977,6 +1148,35 @@ function wireEvents() {
     updateAll();
   });
 
+  els.shortlistForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitShortlist();
+  });
+  els.shortlistInput.addEventListener("input", () => {
+    els.shortlistMessage.textContent = "";
+  });
+  els.shortlistChips.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-code]");
+    if (!button) return;
+    const buttons = [...els.shortlistChips.querySelectorAll("button[data-code]")];
+    const index = buttons.indexOf(button);
+    removeFromShortlist(button.dataset.code);
+    const remaining = [...els.shortlistChips.querySelectorAll("button[data-code]")];
+    (remaining[index] || remaining[index - 1] || els.shortlistInput).focus();
+  });
+  els.shortlistOnly.addEventListener("change", () => {
+    state.shortlist.only = els.shortlistOnly.checked && state.shortlist.codes.length > 0;
+    saveShortlist();
+    updateAll();
+  });
+  els.shortlistToggle.addEventListener("click", () => {
+    const code = state.selectedCode;
+    if (state.shortlist.codes.includes(code)) removeFromShortlist(code);
+    else addToShortlist(code);
+    els.shortlistToggle.focus();
+    revealSelected({ animate: false });
+  });
+
   for (const tab of [els.mapTab, els.tableTab]) {
     tab.addEventListener("click", () => setView(tab === els.tableTab ? "table" : "map"));
     tab.addEventListener("keydown", (event) => {
@@ -1042,13 +1242,21 @@ function wireEvents() {
 }
 
 fillFactorInputs();
+fillShortlistOptions();
+loadShortlist();
 initMap();
 wireEvents();
 setGroups(SAMPLE_ROWS.map((row) => ({ ...row })), "Demo data");
-// Once layout has settled, make sure the default selection isn't hidden behind the card.
-requestAnimationFrame(() => {
+// Once layout has settled, make sure the default selection isn't hidden behind the card. Web
+// fonts can resize the card after the first frame, so this runs again once they've loaded.
+function settleMap() {
   if (!state.mapReady) return;
   state.map.invalidateSize();
-  revealSelected({ animate: false });
+  // A saved shortlist is fitted again now the map and card have their real sizes.
+  state.fittedShortlist = null;
+  if (isFiltering()) fitShortlist({ animate: false });
+  else revealSelected({ animate: false });
   layoutLabels();
-});
+}
+requestAnimationFrame(settleMap);
+document.fonts?.ready.then(settleMap);

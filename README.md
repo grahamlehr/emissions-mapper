@@ -9,8 +9,9 @@ Use it to compare options and guide a planning conversation, not as a post-event
 ## Using it
 1. Click **Load demo** to try sample data, or upload an Excel or CSV file with the columns `location`, `country`, `people` and, optionally, `airport` (an IATA code).
 2. Check **Airport assumptions**. Pick an airport for any group marked "not placed", and check the ones marked "country only".
-3. Adjust the travel policy: the flight length above which business class is assumed, the non-CO2 uplift and return or one-way trips. The emission factors can be changed under **Emission factors (advanced)**.
-4. Click a city on the map to see its totals and biggest contributors, or switch to **Table** for a sortable ranking. From there you can **Download CSV**, **Download PNG** (an image of the map and top 10 for slides) or **Print** a report with the assumptions, the full table and the method.
+3. Under **Host cities**, add the cities you're considering (by name or airport code) to compare only those. Switch off **Compare shortlist only** to rank every city again, with yours tagged. The shortlist is remembered in this browser.
+4. Adjust the travel policy: the flight length above which business class is assumed, the non-CO2 uplift and return or one-way trips. The emission factors can be changed under **Emission factors (advanced)**.
+5. Click a city on the map to see its totals and biggest contributors (and add it to your shortlist), or switch to **Table** for a sortable ranking. From there you can **Download CSV**, **Download PNG** (an image of the map and top 10 for slides) or **Print** a report with the assumptions, the full table and the method.
 
 Your file is read in the browser and never uploaded anywhere.
 

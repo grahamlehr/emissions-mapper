@@ -35,6 +35,7 @@ ES modules don't load from `file://`, so always use the local server.
 - Works as plain static files on GitHub Pages: relative paths only, no build output.
 - Every third-party script or stylesheet is version-pinned, with an `integrity` hash where the CDN supports it.
 - No secrets exist in this repo. Keep it that way.
+- The only browser storage is the host-city shortlist (airport codes and one switch) in `localStorage`, key `emissionsMapper.shortlist`. Never store attendee data.
 
 ## External APIs
 | API | Cost / limits | In tests |

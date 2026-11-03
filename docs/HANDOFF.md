@@ -1,5 +1,5 @@
 # Handoff
-_Updated 2026-11-03 · branch `docs/drop-share-link` · not pushed yet (public repo, needs Graham's OK)_
+_Updated 2026-11-03 · branch `feat/shortlist` · not pushed yet (public repo, needs Graham's OK)_
 
 ## Goal
 Publish the emissions mapper as a public GitHub Pages site, review it, restyle it in Signal, and fix the review's findings.
@@ -24,10 +24,12 @@ Publish the emissions mapper as a public GitHub Pages site, review it, restyle i
 - DESNZ 2026 factors and a "How this is calculated" section (product suggestion 4), merged in PR 7 and live.
 - CSV download and print view (product suggestion 7, partly), merged in PR 8 and live.
 - PNG export, drawn with the Canvas API (no new library), merged in PR 9 and live. Verified locally in Chrome from Map and Table view: 3200×2000 and untainted. Not checked in Safari.
-- Share-by-link dropped (recorded in `docs/DECISIONS.md`). Suggestion 7 is complete.
+- Share-by-link dropped (recorded in `docs/DECISIONS.md`), merged in PR 10. Suggestion 7 is complete.
+- Host-city shortlist (product suggestion 6) on `feat/shortlist`. Verified locally in Chrome at desktop and 375 px: adding, removing, filtering, fit-to-shortlist, localStorage, table tags and the PNG. Not checked in Safari.
 
 ## Next
-- Product backlog in `docs/REVIEW.md`. Suggested order: 6 (your own candidate cities), 5 (rail for short hops), 8 (column mapping).
+- Push `feat/shortlist` and open its PR (needs Graham's OK: public repo).
+- Product backlog in `docs/REVIEW.md`. Suggested order: 5 (rail for short hops), 8 (column mapping), then the gazetteer from 2, which would also let shortlists include cities outside the built-in list.
 - Refresh the factors when DESNZ publishes its 2027 set, around June 2027.
 
 ## Open decisions (need Graham)
@@ -41,7 +43,7 @@ See `docs/DECISIONS.md`.
 - ES modules need the local server. `file://` won't work.
 
 ## State
-`main` is live on GitHub Pages, including PRs 4 to 9.
+`main` is live on GitHub Pages, including PRs 4 to 10. `feat/shortlist` is local only.
 
 ## Prompt for the next session
 Read AGENTS.md, docs/DECISIONS.md and docs/REVIEW.md first, in /Users/graham/Projects/EmissionsMapper. Then build the next product suggestions from REVIEW.md.

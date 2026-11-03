@@ -397,9 +397,23 @@ export function scoreDestination(destination, groups, policy) {
   };
 }
 
-// Every candidate city, lowest total emissions first.
-export function scoreAll(groups, policy) {
-  return AIRPORTS.map((airport) => scoreDestination(airport, groups, policy)).sort(
+// Finds one airport from what a person typed: an IATA code, or a city name or alias that
+// guessAirport is confident about. A country on its own is too vague, so it returns null.
+export function findAirport(query) {
+  const text = String(query ?? "").trim();
+  if (!text) return null;
+  const byCode = airportByCode(text.toUpperCase());
+  if (byCode) return byCode;
+  const guess = guessAirport({ location: text });
+  return guess.airport && guess.confidence === "high" ? guess.airport : null;
+}
+
+// Every candidate city, lowest total emissions first. With `codes` (an array or Set of airport
+// codes) that is not empty, only those airports are scored.
+export function scoreAll(groups, policy, codes) {
+  const wanted = codes ? new Set(codes) : null;
+  const candidates = wanted && wanted.size ? AIRPORTS.filter((airport) => wanted.has(airport.code)) : AIRPORTS;
+  return candidates.map((airport) => scoreDestination(airport, groups, policy)).sort(
     (a, b) => a.totalEmissionsKg - b.totalEmissionsKg
   );
 }
@@ -488,7 +502,7 @@ function factorsDifferFromDefault(factors) {
 const countOf = (count, one, many) => `${count} ${count === 1 ? one : many}`;
 
 // Short plain-English lines describing the assumptions behind the figures, for the print header.
-export function assumptionLines(policy, { placedPeople, placedGroups, unplacedGroups }) {
+export function assumptionLines(policy, { placedPeople, placedGroups, unplacedGroups, shortlist = [] }) {
   const hours = policy.threshold;
   const uplift = Math.round((policy.distanceUplift - 1) * 100);
   return [
@@ -497,7 +511,10 @@ export function assumptionLines(policy, { placedPeople, placedGroups, unplacedGr
     policy.nonCo2Multiplier > 1 ? `Non-CO2 uplift \u00d7${policy.nonCo2Multiplier}` : "Non-CO2 off",
     factorsDifferFromDefault(policy.factors) ? "Factors: custom" : "Factors: DESNZ 2026",
     `Distance +${uplift}%`,
-    `${countOf(placedPeople, "person", "people")} in ${countOf(placedGroups, "group", "groups")} placed; ${countOf(unplacedGroups, "group", "groups")} not placed`
+    `${countOf(placedPeople, "person", "people")} in ${countOf(placedGroups, "group", "groups")} placed; ${countOf(unplacedGroups, "group", "groups")} not placed`,
+    shortlist.length
+      ? `Host cities: shortlist of ${shortlist.length} (${shortlist.join(", ")})`
+      : `Host cities: all ${AIRPORTS.length}`
   ];
 }
 

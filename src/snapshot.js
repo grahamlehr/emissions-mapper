@@ -264,13 +264,13 @@ function drawHeader(ctx, { date, policyLines }) {
   ctx.fillRect(MARGIN, 128, WIDTH - MARGIN * 2, 2);
 }
 
-function drawTable(ctx, { scores, selectedCode, formatTonnes }, area) {
+function drawTable(ctx, { scores, selectedCode, formatTonnes, tableTitle }, area) {
   const { x, y, width, height } = area;
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
   ctx.fillStyle = INK;
   ctx.font = fonts.sans(18, 600);
-  ctx.fillText("Top 10 by total flight emissions", x, y + 14);
+  ctx.fillText(tableTitle || "Top 10 by total flight emissions", x, y + 14);
 
   const headY = y + 52;
   ctx.font = fonts.mono(11, 500);
@@ -409,7 +409,7 @@ function paint(options, withTiles) {
 
 // Options: { map, scores, selectedCode, layers: { heat, jetlag, routes }, policyLines, colourFor(score),
 // radiusFor(score) (metres), routes: [{ points: [[lat, lon]...], origin: [lat, lon] }], dataColours,
-// formatTonnes(kg), date }. Resolves with a 3200 x 2000 PNG Blob. If the tiles taint the canvas
+// formatTonnes(kg), date, tableTitle (optional) }. Resolves with a 3200 x 2000 PNG Blob. If the tiles taint the canvas
 // the map is drawn without them rather than failing.
 export async function renderComparisonPng(options) {
   const opts = { date: new Date(), routes: [], ...options };

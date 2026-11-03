@@ -39,3 +39,8 @@ Flights are classed by distance, because DESNZ's region rule only works for flig
 
 Revisit when DESNZ publishes the 2027 set.
 
+
+## 2026-11-03: No share-by-link
+**Context:** REVIEW.md suggestion 7 proposed encoding the scenario (groups and policy) in the URL hash, so a link would reproduce it without a server.
+**Decision:** Don't build it. A link would carry attendee locations and headcounts into chat logs, email and browser history, which breaks the "attendee data never leaves the browser" invariant in spirit. Planners share results with CSV, Print or PNG instead.
+**Alternatives:** Building it with an explicit warning (the warning is easy to miss, and the link outlives the planning conversation).

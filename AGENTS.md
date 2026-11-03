@@ -45,6 +45,7 @@ ES modules don't load from `file://`, so always use the local server.
 ## Doc map
 - `docs/REVIEW.md`: code review and the improvement backlog
 - `docs/DECISIONS.md`: decisions already made. Don't relitigate them.
+- `docs/PLAN-airports.md`: plan for the airport data and matching overhaul
 - `docs/HANDOFF.md`: current state and the prompt for the next session (`/handoff`)
 
 ## Definition of done

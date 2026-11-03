@@ -1,5 +1,5 @@
 # Handoff
-_Updated 2026-11-03 · branch `feat/shortlist` · not pushed yet (public repo, needs Graham's OK)_
+_Updated 2026-11-03 · branch `feat/shortlist` · PR open, awaiting merge_
 
 ## Goal
 Publish the emissions mapper as a public GitHub Pages site, review it, restyle it in Signal, and fix the review's findings.
@@ -28,7 +28,7 @@ Publish the emissions mapper as a public GitHub Pages site, review it, restyle i
 - Host-city shortlist (product suggestion 6) on `feat/shortlist`. Verified locally in Chrome at desktop and 375 px: adding, removing, filtering, fit-to-shortlist, localStorage, table tags and the PNG. Not checked in Safari.
 
 ## Next
-- Push `feat/shortlist` and open its PR (needs Graham's OK: public repo).
+- Merge the `feat/shortlist` PR (needs Graham's OK: public repo).
 - Product backlog in `docs/REVIEW.md`. Suggested order: 5 (rail for short hops), 8 (column mapping), then the gazetteer from 2, which would also let shortlists include cities outside the built-in list.
 - Refresh the factors when DESNZ publishes its 2027 set, around June 2027.
 
@@ -43,7 +43,7 @@ See `docs/DECISIONS.md`.
 - ES modules need the local server. `file://` won't work.
 
 ## State
-`main` is live on GitHub Pages, including PRs 4 to 10. `feat/shortlist` is local only.
+`main` is live on GitHub Pages, including PRs 4 to 10. `feat/shortlist` is pushed with its PR open.
 
 ## Prompt for the next session
 Read AGENTS.md, docs/DECISIONS.md and docs/REVIEW.md first, in /Users/graham/Projects/EmissionsMapper. Then build the next product suggestions from REVIEW.md.

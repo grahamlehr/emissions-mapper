@@ -432,6 +432,12 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   color: var(--fg-2);
 }
 
+.review-reason {
+  font-size: var(--text-meta);
+  color: var(--fg-2);
+  overflow-wrap: anywhere;
+}
+
 .review-row .sg-select {
   min-width: 0;
 }

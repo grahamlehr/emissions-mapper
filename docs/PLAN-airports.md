@@ -29,6 +29,14 @@ These are the results for today's matcher on the 308-case golden set (`node tool
 - **Overconfident:** "Birmingham" and "Santiago" with no country.
 - **Most safe misses** are country defaults for places outside the 90-airport list.
 
+## PR C results (2026-11-03)
+- **Score:** the matcher scores 99.6% on the 465-case golden set, with no confident wrong answers.
+- **Fresh cases:** 157 cases written after the rules were tuned scored 99.4% before they were merged into the golden set.
+- **Remaining misses:** "Jerome, United States" is under the `cities15000` cut-off, so it falls back to the country and is flagged. "Victoria" with no country goes to Hong Kong, which is accepted but not flagged.
+- **Speed:** 1,000 rows take about 30–45 ms.
+- **Rule change:** the nearest-airport rule was amended (see DECISIONS.md).
+- **New rule:** a location that is just a region name ("Bali", "Bavaria") maps to the region's largest city and is flagged.
+
 ## Approach
 
 ### 1. Data, built offline and committed

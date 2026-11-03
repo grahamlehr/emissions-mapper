@@ -60,3 +60,17 @@ Revisit when DESNZ publishes the 2027 set.
 - Small airports: they add noise, and the nearest-airport rule would skip them anyway.
 - Every large airport as a host: this buries the useful answers and clutters the map.
 - Always the nearest airport: people drive past regional airports to fly from hubs.
+
+## 2026-11-03: Amendment to the nearest-airport rule
+**Context:** The agreed rule (the nearest large airport within 150 km, then a medium one within 100 km) sent cities that have their own airport to a hub: Bristol to Birmingham, Turin to Milan and Inverness to Edinburgh. The golden set showed it.
+**Decision:** The rule now has tiers:
+- a large airport within 50 km
+- a medium airport within 10 km (the city's own airport)
+- a large airport within 100 km
+- a medium airport within 50 km
+- a large airport within 150 km
+- a medium airport within 100 km
+- otherwise the nearest large airport in the same country, flagged for checking
+
+Within a tier, a host airport within 20 km of the nearest one wins. A pick that isn't a host, with another airport within 20 km of it, is flagged for checking.
+**Alternatives:** The original two-step rule, which gave about 7 confidently wrong answers on the golden set. Always taking the nearest airport, which sends Oxford to a regional airstrip rather than Heathrow.

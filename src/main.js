@@ -1,4 +1,5 @@
 import { panPadding, pickVisibleLabels } from "./labels.js";
+import { renderComparisonPng } from "./snapshot.js";
 import {
   AIRPORTS,
   DESNZ_2026,
@@ -97,6 +98,7 @@ const els = {
   tableScroll: document.querySelector("#tableScroll"),
   tableToggle: document.querySelector("#tableToggle"),
   downloadCsv: document.querySelector("#downloadCsv"),
+  downloadPng: document.querySelector("#downloadPng"),
   printTable: document.querySelector("#printTable"),
   printDate: document.querySelector("#printDate"),
   printAssumptions: document.querySelector("#printAssumptions")
@@ -200,7 +202,9 @@ function initMap() {
 
   window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
+    maxZoom: 19,
+    // OSM sends Access-Control-Allow-Origin: *, so the PNG export can read the tiles untainted.
+    crossOrigin: "anonymous"
   }).addTo(state.map);
 
   state.map.createPane("heatPane").style.zIndex = 420;
@@ -597,6 +601,7 @@ function renderTable() {
 
   els.downloadCsv.disabled = !scores.length;
   els.printTable.disabled = !scores.length;
+  if (!state.exporting) els.downloadPng.disabled = !scores.length;
   els.printDate.textContent = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   els.printAssumptions.innerHTML = scores.length
     ? assumptionLines(policy, {
@@ -678,6 +683,112 @@ function downloadComparisonCsv() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// Waits for the map's tiles to finish loading, or for the timeout, whichever comes first.
+function whenTilesLoaded(map, timeout = 1500) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, timeout);
+    function done() {
+      clearTimeout(timer);
+      map.eachLayer((layer) => layer.off?.("load", done));
+      resolve();
+    }
+    let loading = false;
+    map.eachLayer((layer) => {
+      if (layer._loading) {
+        loading = true;
+        layer.once("load", done);
+      }
+    });
+    if (!loading) done();
+  });
+}
+
+function airportRadiusMetres(score, min, max) {
+  const ratio = max === min ? 0.2 : (score.totalEmissionsKg - min) / (max - min);
+  return 180000 + ratio * 760000;
+}
+
+// Saves the current comparison as a PNG: the map as it is now plus the top 10 table. In Table view
+// the map panel is shown off-screen and invisible just long enough to draw it, then hidden again.
+async function downloadComparisonPng() {
+  if (!state.scores.length || !state.mapReady || state.exporting) return;
+  state.exporting = true;
+  const button = els.downloadPng;
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = "Preparing\u2026";
+  const wasHidden = els.mapPanel.hidden;
+  const saved = els.mapPanel.getAttribute("style");
+  try {
+    if (wasHidden) {
+      const size = state.lastMapSize || els.tablePanel.getBoundingClientRect();
+      els.mapPanel.hidden = false;
+      Object.assign(els.mapPanel.style, {
+        position: "fixed",
+        left: "0",
+        top: "0",
+        width: `${Math.round(size.width)}px`,
+        height: `${Math.round(size.height)}px`,
+        visibility: "hidden",
+        pointerEvents: "none"
+      });
+      state.map.invalidateSize({ animate: false });
+      layoutLabels();
+      await whenTilesLoaded(state.map);
+    }
+    const scores = state.scores;
+    const min = Math.min(...scores.map((score) => score.totalEmissionsKg));
+    const max = Math.max(...scores.map((score) => score.totalEmissionsKg));
+    const selected = scores.find((score) => score.destination.code === state.selectedCode);
+    const policy = getPolicy();
+    const placed = placedGroups();
+    const people = scores[0].totalPeople;
+    const blob = await renderComparisonPng({
+      map: state.map,
+      scores,
+      selectedCode: state.selectedCode,
+      layers: { ...state.layers },
+      policyLines: assumptionLines(policy, {
+        placedPeople: people,
+        placedGroups: placed.length,
+        unplacedGroups: state.groups.length - placed.length
+      }),
+      colourFor: (score) => colorForScore(score, min, max),
+      radiusFor: (score) => airportRadiusMetres(score, min, max),
+      routes: selected
+        ? selected.drivers.slice(0, 8).map((driver) => ({
+            points: interpolateRoute(driver.origin, selected.destination),
+            origin: [driver.origin.lat, driver.origin.lon]
+          }))
+        : [],
+      dataColours: DATA_COLOURS,
+      formatTonnes,
+      date: new Date()
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `host-city-comparison-${localDateStamp()}.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    console.error("PNG export failed", error);
+    els.fileMessage.textContent = "Could not create the PNG. Try again, or use Print instead.";
+  } finally {
+    if (wasHidden) {
+      els.mapPanel.hidden = true;
+      if (saved === null) els.mapPanel.removeAttribute("style");
+      else els.mapPanel.setAttribute("style", saved);
+      state.map.invalidateSize({ animate: false });
+    }
+    state.exporting = false;
+    button.textContent = label;
+    button.disabled = !state.scores.length;
+  }
+}
+
 // Printing always shows the whole table, whichever view is open. Whatever was showing is put back after.
 let printRestore = null;
 
@@ -721,6 +832,11 @@ function selectDestinationByCode(code) {
 function setView(view, { focus = false } = {}) {
   state.view = view;
   const isTable = view === "table";
+  // Remember how big the map was, so the PNG export can recreate it from Table view.
+  if (isTable && !els.mapPanel.hidden) {
+    const box = els.map.getBoundingClientRect();
+    if (box.width) state.lastMapSize = { width: box.width, height: box.height };
+  }
   els.mapTab.setAttribute("aria-selected", String(!isTable));
   els.tableTab.setAttribute("aria-selected", String(isTable));
   els.mapTab.tabIndex = isTable ? -1 : 0;
@@ -899,6 +1015,7 @@ function wireEvents() {
   });
 
   els.downloadCsv.addEventListener("click", downloadComparisonCsv);
+  els.downloadPng.addEventListener("click", downloadComparisonPng);
   els.printTable.addEventListener("click", () => window.print());
   window.addEventListener("beforeprint", beforePrint);
   window.addEventListener("afterprint", afterPrint);

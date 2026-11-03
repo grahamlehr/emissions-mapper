@@ -1,5 +1,5 @@
 # Handoff
-_Updated 2026-11-03 · branch `docs/airport-plan` · not pushed yet (public repo, needs Graham's OK)_
+_Updated 2026-11-03 · branch `feat/airport-golden-set` (stacked on `docs/airport-plan`) · not pushed yet (public repo, needs Graham's OK)_
 
 ## Goal
 Publish the emissions mapper as a public GitHub Pages site, review it, restyle it in Signal, and fix the review's findings.
@@ -28,12 +28,11 @@ Publish the emissions mapper as a public GitHub Pages site, review it, restyle i
 - Host-city shortlist (product suggestion 6), merged in PR 11 and live. Verified locally in Chrome at desktop and 375 px: adding, removing, filtering, fit-to-shortlist, localStorage, table tags and the PNG. Not checked in Safari.
 
 ## Next
-- Airport data and matching overhaul: plan in `docs/PLAN-airports.md`, waiting on the decisions listed there. Delivered as PRs A to D.
+- Airport data and matching overhaul (`docs/PLAN-airports.md`). The decisions are agreed and recorded in DECISIONS.md. PR A (golden set and scorer, baseline 51.9%) is committed on `feat/airport-golden-set`. Next is PR B: the data script. It needs the OurAirports and GeoNames files downloaded into `data/raw/` (Graham's OK for the downloads).
 - Product backlog in `docs/REVIEW.md`. Suggested order: 5 (rail for short hops), 8 (column mapping), then the gazetteer from 2, which would also let shortlists include cities outside the built-in list.
 - Refresh the factors when DESNZ publishes its 2027 set, around June 2027.
 
 ## Open decisions (need Graham)
-- The seven decisions in `docs/PLAN-airports.md` (data sources, which airports, gazetteer size, hosts, the data script, the nearest-airport rule, loading).
 - Which product suggestions to build next, and in what order.
 
 ## Decided: don't relitigate

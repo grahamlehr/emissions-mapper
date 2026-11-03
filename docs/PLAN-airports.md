@@ -15,6 +15,20 @@ Any reasonable "where are you coming from" entry in a planner's spreadsheet land
 - **Matching:** a whole-word city or alias match, country first. If only the country is known, it falls back to the country's hub. Anything smaller than the listed cities ("Oxford", "Leiden", "Portland, OR") gets only a country default or is unplaced.
 - **The airport picker** in Airport assumptions is a `<select>`, which won't scale beyond a few hundred options.
 
+## Baseline (PR A, 2026-11-03)
+These are the results for today's matcher on the 308-case golden set (`node tools/score-matching.mjs`):
+
+| Outcome | Cases | Share |
+|---|---|---|
+| Correct | 160 | 51.9% |
+| Flagged (safe miss) | 145 | 47.1% |
+| Overconfident (right, but should have been flagged) | 2 | 0.6% |
+| Confident wrong | 1 | 0.3% |
+
+- **Confident wrong:** "Frankfurt (Oder)" goes to FRA.
+- **Overconfident:** "Birmingham" and "Santiago" with no country.
+- **Most safe misses** are country defaults for places outside the 90-airport list.
+
 ## Approach
 
 ### 1. Data, built offline and committed
@@ -83,7 +97,7 @@ The review panel shows how each match was made, for example "Leiden → AMS (Ams
 ## Delivery: four PRs, each usable on its own
 | PR | Contents | Done when |
 |---|---|---|
-| A. Golden set | `tests/fixtures/locations.json` with about 200 cases and expected airports, covering the tricky ones (Portland OR/ME, London ON, Paris TX, Birmingham UK/AL, Cambridge MA, San José CR/CA, Georgia the country and the US state, Jerome, Washington DC, Frankfurt am Main, NYC, Bay Area, diacritics, typos, "Remote", blanks, plus non-English spellings such as München, Lisboa, Den Haag). Also a scoring script that prints accuracy. | The baseline accuracy of today's matcher is recorded in this plan. No behaviour change. |
+| A. Golden set | `tests/fixtures/locations.json` with about 300 cases and expected airports, covering the tricky ones (Portland OR/ME, London ON, Paris TX, Birmingham UK/AL, Cambridge MA, San José CR/CA, Georgia the country and the US state, Jerome, Washington DC, Frankfurt am Main, NYC, Bay Area, diacritics, typos, "Remote", blanks, plus non-English spellings such as München, Lisboa, Den Haag). Also a scoring script that prints accuracy. | The baseline accuracy of today's matcher is recorded in this plan. No behaviour change. |
 | B. Data | The build script, the generated `data/*.json`, `overrides.json` seeded from today's 90, the loader, and the model taking data as an argument. Matching behaves exactly as today. | Existing tests pass on the new data; the size budget is met; the airport count is known. |
 | C. Matcher | The pipeline above, with unit tests for each step and a performance test. | The golden set has no confident wrong answers and is at least 95% correct; 1,000 rows take under 200 ms. |
 | D. UI and docs | The searchable airport picker, match reasons, the shortlist across all airports, the credits, and updates to AGENTS.md, README and DECISIONS. | Checked in the browser at desktop width and 375 px; docs updated. |

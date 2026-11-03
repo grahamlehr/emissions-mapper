@@ -438,8 +438,20 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   overflow-wrap: anywhere;
 }
 
-.review-row .sg-select {
+.review-row .sg-select,
+.review-row .sg-input {
   min-width: 0;
+  width: 100%;
+}
+
+.review-message {
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--danger-text);
+}
+
+.review-message:empty {
+  display: none;
 }
 
 /* ---------- Map stage ---------- */

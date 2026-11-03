@@ -37,6 +37,12 @@ These are the results for today's matcher on the 308-case golden set (`node tool
 - **Rule change:** the nearest-airport rule was amended (see DECISIONS.md).
 - **New rule:** a location that is just a region name ("Bali", "Bavaria") maps to the region's largest city and is flagged.
 
+## PR D results (2026-11-03)
+- **Picker:** the review panel's dropdown is now a search box over all 3,244 airports. It shares one list with the shortlist input.
+- **Reason lines:** each group shows how it was placed, with the distance to the airport.
+- **Shortlist:** it accepts any airport. With the filter off, the ranking is the 90 hosts plus the shortlisted airports.
+- **Checked:** locally in Chrome at desktop width and 375 px.
+
 ## Approach
 
 ### 1. Data, built offline and committed

@@ -1,3 +1,4 @@
+import "./helpers/dataset.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_POLICY, SAMPLE_ROWS, buildGroups, findAirport, scoreAll } from "../src/model.js";

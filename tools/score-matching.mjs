@@ -2,6 +2,7 @@
 // Usage: node tools/score-matching.mjs [--all] [--json] [--strict] [--fixture path]
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import "../tests/helpers/dataset.mjs";
 import { guessAirport } from "../src/model.js";
 import { classify, summarise, meetsTarget, TARGET_ACCURACY } from "./scoring.mjs";
 

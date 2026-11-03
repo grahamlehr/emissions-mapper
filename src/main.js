@@ -6,7 +6,9 @@ import {
   SAMPLE_ROWS,
   assumptionLines,
   airportByCode,
+  hostByCode,
   comparisonCsv,
+  installDataset,
   findAirport,
   buildGroups,
   normalizeImportedRow,
@@ -58,7 +60,7 @@ function loadShortlist() {
     if (!saved || !Array.isArray(saved.codes)) return;
     const codes = [];
     for (const code of saved.codes) {
-      if (typeof code === "string" && airportByCode(code) && !codes.includes(code)) codes.push(code);
+      if (typeof code === "string" && hostByCode(code) && !codes.includes(code)) codes.push(code);
     }
     state.shortlist.codes = codes;
     state.shortlist.only = Boolean(saved.only) && codes.length > 0;
@@ -364,10 +366,8 @@ const CONFIDENCE_TAGS = {
 
 const CONFIDENCE_ORDER = { unplaced: 0, medium: 1, high: 2, manual: 2 };
 
-const AIRPORT_OPTIONS = [...AIRPORTS]
-  .sort((a, b) => a.city.localeCompare(b.city))
-  .map((airport) => `<option value="${airport.code}">${airport.city}, ${airport.country} (${airport.code})</option>`)
-  .join("");
+// Built by buildAirportLists() once the airport data has loaded.
+let AIRPORT_OPTIONS = "";
 
 function applyConfidenceTag(tag, confidence) {
   const info = CONFIDENCE_TAGS[confidence] || CONFIDENCE_TAGS.high;
@@ -976,9 +976,15 @@ function renderMethod(policy) {
     : "One-way journeys are counted. Switch on Return trips to count both ways (\u00d72).";
 }
 
-const SHORTLIST_OPTIONS = [...AIRPORTS]
-  .sort((a, b) => a.city.localeCompare(b.city))
-  .map((airport) => ({ airport, label: `${airport.city}, ${airport.country} (${airport.code})` }));
+let SHORTLIST_OPTIONS = [];
+
+function buildAirportLists() {
+  const sorted = [...AIRPORTS].sort((a, b) => a.city.localeCompare(b.city));
+  AIRPORT_OPTIONS = sorted
+    .map((airport) => `<option value="${airport.code}">${airport.city}, ${airport.country} (${airport.code})</option>`)
+    .join("");
+  SHORTLIST_OPTIONS = sorted.map((airport) => ({ airport, label: `${airport.city}, ${airport.country} (${airport.code})` }));
+}
 
 function fillShortlistOptions() {
   for (const { label } of SHORTLIST_OPTIONS) {
@@ -1042,7 +1048,7 @@ function submitShortlist() {
   if (!value) return;
   const listed = SHORTLIST_OPTIONS.find((option) => option.label.toLowerCase() === value.toLowerCase());
   const codeInLabel = value.match(/\(([A-Za-z]{3})\)\s*$/);
-  const airport = (codeInLabel && airportByCode(codeInLabel[1].toUpperCase())) || listed?.airport || findAirport(value);
+  const airport = (codeInLabel && hostByCode(codeInLabel[1].toUpperCase())) || listed?.airport || findAirport(value);
   if (!airport) {
     els.shortlistMessage.textContent = `Couldn't find "${value}". Pick a city from the list.`;
     return;
@@ -1241,12 +1247,46 @@ function wireEvents() {
   });
 }
 
-fillFactorInputs();
-fillShortlistOptions();
-loadShortlist();
-initMap();
-wireEvents();
-setGroups(SAMPLE_ROWS.map((row) => ({ ...row })), "Demo data");
+async function loadDataset() {
+  const [airports, overrides] = await Promise.all(
+    ["data/airports.json", "data/overrides.json"].map(async (path) => {
+      const response = await fetch(path);
+      if (!response.ok) throw new Error(`${path}: ${response.status}`);
+      return response.json();
+    })
+  );
+  installDataset({ airports, overrides });
+}
+
+// Attendee input waits for the airport data, because matching needs it.
+function setLoading(loading) {
+  els.file.disabled = loading;
+  els.loadDemo.disabled = loading;
+}
+
+async function start() {
+  els.fileMessage.textContent = "Loading airport data\u2026";
+  setLoading(true);
+  try {
+    await loadDataset();
+  } catch (error) {
+    console.error(error);
+    els.fileMessage.textContent = "Couldn't load the airport data. Check your connection and reload the page.";
+    return;
+  }
+  els.fileMessage.textContent = "";
+  buildAirportLists();
+  fillFactorInputs();
+  fillShortlistOptions();
+  loadShortlist();
+  initMap();
+  wireEvents();
+  setLoading(false);
+  setGroups(SAMPLE_ROWS.map((row) => ({ ...row })), "Demo data");
+  requestAnimationFrame(settleMap);
+  document.fonts?.ready.then(settleMap);
+}
+
 // Once layout has settled, make sure the default selection isn't hidden behind the card. Web
 // fonts can resize the card after the first frame, so this runs again once they've loaded.
 function settleMap() {
@@ -1258,5 +1298,4 @@ function settleMap() {
   else revealSelected({ animate: false });
   layoutLabels();
 }
-requestAnimationFrame(settleMap);
-document.fonts?.ready.then(settleMap);
+start();

@@ -5,3 +5,6 @@
 .ua
 .venv/
 .claude/settings.local.json
+
+# Source data for tools/build-data.mjs, downloaded by hand (see docs/PLAN-airports.md)
+data/raw/

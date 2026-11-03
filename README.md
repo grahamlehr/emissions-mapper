@@ -35,6 +35,8 @@ The method follows the [UK Government GHG conversion factors 2026](https://www.g
 
 Only CO2 is counted, so results are slightly lower than DESNZ's CO2e figures.
 
+Airport data comes from [OurAirports](https://ourairports.com/data/) (public domain). Places, regions and time zones come from [GeoNames](https://www.geonames.org/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Both are bundled in `data/`, so nothing about your attendees is looked up online.
+
 ## Running locally
 ```bash
 python3 -m http.server 8080 --bind 127.0.0.1

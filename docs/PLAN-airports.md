@@ -57,12 +57,25 @@ A Node script, `tools/build-data.mjs` (no dependencies), reads source files that
 
 Today's 90 airports become the first version of this file.
 
-**Size budget:** about 1 MB of JSON in total before compression, which GitHub Pages serves gzipped at about 300 KB. If GeoNames alternate names push past that, keep only Latin-script names that differ from the main name. A few non-Latin names can be added later if needed.
+**Size budget (revised in PR B):** the original target of about 1 MB raw couldn't be met. `cities15000` has 34,197 places, which is 1.7 MB even with no alternate names. The budget is now about 900 KB gzipped for `places.json`. To meet it:
+- Alternate names are Latin-script only.
+- They're kept only for places of 100,000 people or more, which is where exonyms such as München, Lisboa and Bombay matter.
+- The ASCII name is left blank when it's the same as the name.
+
+Result: `airports.json` is 411 KB raw (148 KB gzipped), and `places.json` is 2.3 MB raw (842 KB gzipped). PR C loads `places.json` only when a planner uploads a file, so it doesn't slow the first page load.
 
 ### 2. Loading
-- `main.js` fetches `data/airports.json` and `data/places.json` from the same origin at start-up. This request carries no attendee data, so it fits the privacy invariant.
-- While the files load, the upload controls show "Loading airport data…". If the fetch fails, the page explains and offers a retry.
-- The model stays pure. Matching functions take the data as an argument (an index built once), so tests load the same JSON from disk.
+- At start-up, `main.js` fetches `data/airports.json` and `data/overrides.json` from the same origin. `places.json` is fetched on the first upload (PR C), and the demo data carries airport codes so it doesn't need places. None of these requests carries attendee data.
+- While the files load, the upload controls are disabled and show "Loading airport data…". If the fetch fails, the page says so and asks for a reload.
+- The model stays pure apart from one step: `installDataset()` builds the indexes once. Tests load the same JSON from disk through `tests/helpers/dataset.mjs`.
+
+**PR B results (2026-11-03):**
+- **Airports:** 3,244 (1,151 large, 2,093 medium).
+- **Countries:** 252.
+- **Regions:** 3,865, with abbreviations for every US, Canadian and Australian region and every UK nation.
+- **Time zones:** 206 airports with no same-country place within 300 km took the zone of the nearest place anywhere.
+- **The 90 hosts:** identical to before, apart from coordinates moving by up to 0.02°.
+- **Golden-set score:** unchanged, with all 308 rows identical.
 
 ### 3. Matching pipeline
 These steps run in order. Each result carries a confidence and a plain-English reason, which the review panel shows.

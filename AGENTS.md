@@ -18,8 +18,9 @@ A browser-only tool for event planners. Upload a spreadsheet of where attendees 
 |---|---|
 | Install | None |
 | Dev | `python3 -m http.server 8080 --bind 127.0.0.1` (or the `static` entry in `.claude/launch.json`) |
-| Test | `node --test` (runs `tests/*.test.mjs` against the pure modules `src/model.js`, `src/labels.js` and `src/layout.js`) |
-| Lint | `for f in src/*.js; do node --check "$f"; done` (syntax only) |
+| Test | `node --test` (runs `tests/*.test.mjs` against the pure modules `src/model.js`, `src/labels.js` and `src/layout.js`, plus `tools/scoring.mjs`) |
+| Score matching | `node tools/score-matching.mjs` (golden set in `tests/fixtures/locations.json`; `--all` lists every miss, `--strict` fails below target) |
+| Lint | `for f in src/*.js tools/*.mjs; do node --check "$f"; done` (syntax only) |
 | Deploy | Merge to `main`. GitHub Pages publishes within a minute or two |
 
 ES modules don't load from `file://`, so always use the local server.
@@ -45,6 +46,7 @@ ES modules don't load from `file://`, so always use the local server.
 ## Doc map
 - `docs/REVIEW.md`: code review and the improvement backlog
 - `docs/DECISIONS.md`: decisions already made. Don't relitigate them.
+- `docs/PLAN-airports.md`: plan for the airport data and matching overhaul
 - `docs/HANDOFF.md`: current state and the prompt for the next session (`/handoff`)
 
 ## Definition of done

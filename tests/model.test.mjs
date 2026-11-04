@@ -40,21 +40,21 @@ test("Jerome, United States is not Rome", () => {
   assert.equal(guess.confidence, "medium");
 });
 
-test("London, Canada falls back to the Canadian hub", () => {
+test("London, Canada is London, Ontario (it used to fall back to the Canadian hub)", () => {
   const guess = guessAirport({ location: "London", country: "Canada" });
-  assert.equal(guess.airport.code, "YYZ");
-  assert.equal(guess.confidence, "medium");
+  assert.equal(guess.airport.code, "YXU");
+  assert.equal(guess.confidence, "high");
 });
 
 test("country can be spotted inside the location text", () => {
-  assert.equal(code({ location: "London, Canada" }), "YYZ");
+  assert.equal(code({ location: "London, Canada" }), "YXU");
   assert.equal(code({ location: "Seattle, United States" }), "SEA");
 });
 
-test("Leeds, U.K. uses the UK hub", () => {
+test("Leeds, U.K. is placed at Leeds Bradford (it used to get the UK hub)", () => {
   const guess = guessAirport({ location: "Leeds", country: "U.K." });
-  assert.equal(guess.airport.code, "LHR");
-  assert.equal(guess.confidence, "medium");
+  assert.equal(guess.airport.code, "LBA");
+  assert.equal(guess.confidence, "high");
   assert.equal(canonicalCountry("U.S.A."), "United States");
 });
 
@@ -78,7 +78,7 @@ test("aliases and longest name win", () => {
 });
 
 test("unknown places are unplaced, with no London fallback", () => {
-  const guess = guessAirport({ location: "Atlantis" });
+  const guess = guessAirport({ location: "Narnia" });
   assert.equal(guess.airport, null);
   assert.equal(guess.confidence, "unplaced");
 });
@@ -134,7 +134,7 @@ test("buildGroups counts skipped rows but not blank ones", () => {
     { location: "Berlin", country: "Germany", people: "lots" },
     { location: "Rome", country: "Italy", people: 0 },
     { location: "", country: "", people: "" },
-    { location: "Atlantis", people: 4 }
+    { location: "Narnia", people: 4 }
   ]);
   assert.equal(groups.length, 2);
   assert.equal(groups[0].people, 1200);

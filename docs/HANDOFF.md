@@ -1,5 +1,5 @@
 # Handoff
-_Updated 2026-11-03 · branch `feat/airport-data` (stacked on `feat/airport-golden-set`, PR 12) · not pushed yet (public repo, needs Graham's OK)_
+_Updated 2026-11-03 · branch `feat/airport-matcher` (stacked on `feat/airport-data`, on `feat/airport-golden-set` = PR 12) · not pushed yet (public repo, needs Graham's OK)_
 
 ## Goal
 Publish the emissions mapper as a public GitHub Pages site, review it, restyle it in Signal, and fix the review's findings.
@@ -28,7 +28,7 @@ Publish the emissions mapper as a public GitHub Pages site, review it, restyle i
 - Host-city shortlist (product suggestion 6), merged in PR 11 and live. Verified locally in Chrome at desktop and 375 px: adding, removing, filtering, fit-to-shortlist, localStorage, table tags and the PNG. Not checked in Safari.
 
 ## Next
-- Airport data and matching overhaul (`docs/PLAN-airports.md`). The decisions are agreed and recorded in DECISIONS.md. PR A (golden set and scorer, baseline 51.9%) is PR 12. PR B (data script, generated data, overrides and loader, with matching unchanged) is committed on `feat/airport-data`. Next is PR C, the new matcher, aiming for at least 95% with no confident wrong answers. The source files are in `data/raw/`, which is git-ignored.
+- Airport data and matching overhaul (`docs/PLAN-airports.md`). The decisions are agreed and recorded in DECISIONS.md. PR A (golden set and scorer, baseline 51.9%) is PR 12. PR B (data script, generated data, overrides and loader, with matching unchanged) is committed on `feat/airport-data`. PR C (the new matcher: 99.6% on 465 cases, no confident wrong) is committed on `feat/airport-matcher`. Next is PR D: a searchable airport picker over all 3,244 airports, and a shortlist from any airport. The source files are in `data/raw/`, which is git-ignored.
 - Product backlog in `docs/REVIEW.md`. Suggested order: 5 (rail for short hops), 8 (column mapping), then the gazetteer from 2, which would also let shortlists include cities outside the built-in list.
 - Refresh the factors when DESNZ publishes its 2027 set, around June 2027.
 

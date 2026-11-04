@@ -9,6 +9,9 @@ import {
   hostByCode,
   comparisonCsv,
   installDataset,
+  installPlaces,
+  placesInstalled,
+  guessAirport,
   findAirport,
   buildGroups,
   normalizeImportedRow,
@@ -75,6 +78,11 @@ function saveShortlist() {
   } catch {
     // Not being able to remember the shortlist is not worth interrupting anyone for.
   }
+}
+
+// findAirport now accepts any airport, but the shortlist only scores hosts until PR D widens it.
+function hostOnly(airport) {
+  return airport ? hostByCode(airport.code) : null;
 }
 
 function isFiltering() {
@@ -359,7 +367,7 @@ function layoutLabels() {
 
 const CONFIDENCE_TAGS = {
   unplaced: { className: "sg-tag sg-tag--danger", label: "not placed" },
-  medium: { className: "sg-tag sg-tag--warning", label: "country only" },
+  medium: { className: "sg-tag sg-tag--warning", label: "check" },
   high: { className: "sg-tag sg-tag--muted", label: "matched" },
   manual: { className: "sg-tag sg-tag--muted", label: "chosen" }
 };
@@ -368,6 +376,15 @@ const CONFIDENCE_ORDER = { unplaced: 0, medium: 1, high: 2, manual: 2 };
 
 // Built by buildAirportLists() once the airport data has loaded.
 let AIRPORT_OPTIONS = "";
+
+// The list above holds only host cities, so a group matched to any other airport gets its own
+// option at the top; otherwise the select would show nothing.
+function matchedAirportOption(group) {
+  if (!group.airportCode || hostByCode(group.airportCode)) return "";
+  const airport = airportByCode(group.airportCode);
+  if (!airport) return "";
+  return `<option value="${airport.code}">${escapeHtml(airport.name)}, ${escapeHtml(airport.country)} (${airport.code})</option>`;
+}
 
 function applyConfidenceTag(tag, confidence) {
   const info = CONFIDENCE_TAGS[confidence] || CONFIDENCE_TAGS.high;
@@ -382,7 +399,7 @@ function plural(count, one, many) {
 // Warns about groups that are missing from the totals (not placed) or only roughly placed.
 function renderNotices() {
   const unplaced = state.groups.filter((group) => !group.airportCode);
-  const countryOnly = state.groups.filter((group) => group.airportCode && group.confidence === "medium");
+  const toCheck = state.groups.filter((group) => group.airportCode && group.confidence === "medium");
   const parts = [];
   if (unplaced.length) {
     const people = unplaced.reduce((sum, group) => sum + group.people, 0);
@@ -391,10 +408,10 @@ function renderNotices() {
       text: `${unplaced.length} of ${plural(state.groups.length, "group", "groups")} couldn't be placed (${plural(people, "person", "people")}). They're left out of the totals until you pick an airport.`
     });
   }
-  if (countryOnly.length) {
+  if (toCheck.length) {
     parts.push({
       level: "warning",
-      text: `${plural(countryOnly.length, "group was", "groups were")} placed by country only, check ${countryOnly.length === 1 ? "it" : "them"}.`
+      text: `${plural(toCheck.length, "group was", "groups were")} placed with some doubt, check ${toCheck.length === 1 ? "it" : "them"}.`
     });
   }
   for (const element of els.notices) {
@@ -430,11 +447,12 @@ function renderReview() {
         <div class="review-place">
           <strong>${escapeHtml(group.inputLocation)}</strong>
           <span class="review-people">${group.people.toLocaleString()} people</span>
+          ${group.reason ? `<span class="review-reason">${escapeHtml(group.reason)}</span>` : ""}
         </div>
         <span></span>
       </div>
       <select class="sg-select" aria-label="Assumed airport for ${escapeHtml(group.inputLocation)}">
-        ${group.airportCode ? "" : `<option value="">Choose an airport…</option>`}${AIRPORT_OPTIONS}
+        ${group.airportCode ? "" : `<option value="">Choose an airport…</option>`}${matchedAirportOption(group)}${AIRPORT_OPTIONS}
       </select>
     `;
     const tag = row.querySelector(".review-head > span:last-child");
@@ -444,6 +462,9 @@ function renderReview() {
     select.addEventListener("change", () => {
       group.airportCode = select.value || null;
       group.confidence = select.value ? "manual" : "unplaced";
+      group.reason = select.value ? "chosen by you" : "no match";
+      const reason = row.querySelector(".review-reason");
+      if (reason) reason.textContent = group.reason;
       applyConfidenceTag(tag, group.confidence);
       updateAll();
     });
@@ -1048,7 +1069,7 @@ function submitShortlist() {
   if (!value) return;
   const listed = SHORTLIST_OPTIONS.find((option) => option.label.toLowerCase() === value.toLowerCase());
   const codeInLabel = value.match(/\(([A-Za-z]{3})\)\s*$/);
-  const airport = (codeInLabel && hostByCode(codeInLabel[1].toUpperCase())) || listed?.airport || findAirport(value);
+  const airport = (codeInLabel && hostByCode(codeInLabel[1].toUpperCase())) || listed?.airport || hostOnly(findAirport(value));
   if (!airport) {
     els.shortlistMessage.textContent = `Couldn't find "${value}". Pick a city from the list.`;
     return;
@@ -1128,10 +1149,15 @@ function wireEvents() {
   els.file.addEventListener("change", async () => {
     const file = els.file.files?.[0];
     if (!file) return;
-    els.fileMessage.textContent = `Reading ${file.name}...`;
     try {
+      let placesNote = "";
+      if (!placesInstalled()) {
+        els.fileMessage.textContent = "Loading place names\u2026";
+        if (!(await loadPlaces())) placesNote = " (place names didn't load, so small towns may not be placed)";
+      }
+      els.fileMessage.textContent = `Reading ${file.name}...`;
       const rows = await parseFile(file);
-      setGroups(rows, file.name);
+      setGroups(rows, file.name + placesNote);
     } catch (error) {
       els.fileMessage.textContent = error.message;
     }
@@ -1245,6 +1271,53 @@ function wireEvents() {
       renderSelected();
     });
   });
+}
+
+// The place names are the bigger download, so they are fetched on the first upload rather than at
+// start-up. Matching still works without them (airport cities and countries only); if the
+// download fails, the upload carries on that way and says so.
+let placesPromise = null;
+
+function loadPlaces() {
+  if (placesInstalled()) return Promise.resolve(true);
+  if (!placesPromise) {
+    placesPromise = fetch("data/places.json")
+      .then((response) => {
+        if (!response.ok) throw new Error(`data/places.json: ${response.status}`);
+        return response.json();
+      })
+      .then((json) => {
+        installPlaces(json);
+        rematchGroups();
+        return true;
+      })
+      .catch((error) => {
+        console.error(error);
+        placesPromise = null;
+        return false;
+      });
+  }
+  return placesPromise;
+}
+
+// Groups loaded before the place names arrived are matched again, except any the user chose.
+function rematchGroups() {
+  let changed = false;
+  for (const group of state.groups) {
+    if (group.confidence === "manual" || !group.row) continue;
+    const guess = guessAirport(group.row);
+    const code = guess.airport ? guess.airport.code : null;
+    if (code !== group.airportCode || guess.confidence !== group.confidence || guess.reason !== group.reason) changed = true;
+    group.airportCode = code;
+    group.confidence = guess.confidence;
+    group.reason = guess.reason;
+    group.place = guess.place || null;
+    group.distanceKm = guess.distanceKm ?? null;
+  }
+  if (changed) {
+    renderReview();
+    updateAll();
+  }
 }
 
 async function loadDataset() {

@@ -3243,6 +3243,1624 @@
    },
    "expect": [],
    "note": "should not be placed"
+  },
+  {
+   "id": "rotterdam-netherlands",
+   "row": {
+    "location": "Rotterdam",
+    "country": "Netherlands"
+   },
+   "expect": [
+    "RTM",
+    "AMS"
+   ]
+  },
+  {
+   "id": "eindhoven-netherlands",
+   "row": {
+    "location": "Eindhoven",
+    "country": "Netherlands"
+   },
+   "expect": [
+    "EIN"
+   ]
+  },
+  {
+   "id": "groningen-netherlands",
+   "row": {
+    "location": "Groningen",
+    "country": "Netherlands"
+   },
+   "expect": [
+    "GRQ",
+    "AMS"
+   ]
+  },
+  {
+   "id": "bordeaux-france",
+   "row": {
+    "location": "Bordeaux",
+    "country": "France"
+   },
+   "expect": [
+    "BOD"
+   ]
+  },
+  {
+   "id": "nantes-france",
+   "row": {
+    "location": "Nantes",
+    "country": "France"
+   },
+   "expect": [
+    "NTE"
+   ]
+  },
+  {
+   "id": "lille-france",
+   "row": {
+    "location": "Lille",
+    "country": "France"
+   },
+   "expect": [
+    "LIL",
+    "BRU",
+    "CDG"
+   ]
+  },
+  {
+   "id": "montpellier-france",
+   "row": {
+    "location": "Montpellier",
+    "country": "France"
+   },
+   "expect": [
+    "MPL"
+   ]
+  },
+  {
+   "id": "bilbao-spain",
+   "row": {
+    "location": "Bilbao",
+    "country": "Spain"
+   },
+   "expect": [
+    "BIO"
+   ]
+  },
+  {
+   "id": "malaga-spain",
+   "row": {
+    "location": "Malaga",
+    "country": "Spain"
+   },
+   "expect": [
+    "AGP"
+   ]
+  },
+  {
+   "id": "palma-de-mallorca-spain",
+   "row": {
+    "location": "Palma de Mallorca",
+    "country": "Spain"
+   },
+   "expect": [
+    "PMI"
+   ]
+  },
+  {
+   "id": "zaragoza-spain",
+   "row": {
+    "location": "Zaragoza",
+    "country": "Spain"
+   },
+   "expect": [
+    "ZAZ",
+    "MAD",
+    "BCN"
+   ]
+  },
+  {
+   "id": "bergen-norway",
+   "row": {
+    "location": "Bergen",
+    "country": "Norway"
+   },
+   "expect": [
+    "BGO"
+   ]
+  },
+  {
+   "id": "trondheim-norway",
+   "row": {
+    "location": "Trondheim",
+    "country": "Norway"
+   },
+   "expect": [
+    "TRD"
+   ]
+  },
+  {
+   "id": "aarhus-denmark",
+   "row": {
+    "location": "Aarhus",
+    "country": "Denmark"
+   },
+   "expect": [
+    "AAR",
+    "BLL"
+   ]
+  },
+  {
+   "id": "tampere-finland",
+   "row": {
+    "location": "Tampere",
+    "country": "Finland"
+   },
+   "expect": [
+    "TMP",
+    "HEL"
+   ]
+  },
+  {
+   "id": "leipzig-germany",
+   "row": {
+    "location": "Leipzig",
+    "country": "Germany"
+   },
+   "expect": [
+    "LEJ"
+   ]
+  },
+  {
+   "id": "dresden-germany",
+   "row": {
+    "location": "Dresden",
+    "country": "Germany"
+   },
+   "expect": [
+    "DRS"
+   ]
+  },
+  {
+   "id": "hanover-germany",
+   "row": {
+    "location": "Hanover",
+    "country": "Germany"
+   },
+   "expect": [
+    "HAJ"
+   ]
+  },
+  {
+   "id": "bremen-germany",
+   "row": {
+    "location": "Bremen",
+    "country": "Germany"
+   },
+   "expect": [
+    "BRE"
+   ]
+  },
+  {
+   "id": "freiburg-germany",
+   "row": {
+    "location": "Freiburg",
+    "country": "Germany"
+   },
+   "expect": [
+    "BSL",
+    "STR",
+    "ZRH"
+   ]
+  },
+  {
+   "id": "graz-austria",
+   "row": {
+    "location": "Graz",
+    "country": "Austria"
+   },
+   "expect": [
+    "GRZ",
+    "VIE"
+   ]
+  },
+  {
+   "id": "salzburg-austria",
+   "row": {
+    "location": "Salzburg",
+    "country": "Austria"
+   },
+   "expect": [
+    "SZG",
+    "MUC"
+   ]
+  },
+  {
+   "id": "innsbruck-austria",
+   "row": {
+    "location": "Innsbruck",
+    "country": "Austria"
+   },
+   "expect": [
+    "INN",
+    "MUC"
+   ]
+  },
+  {
+   "id": "cork-ireland",
+   "row": {
+    "location": "Cork",
+    "country": "Ireland"
+   },
+   "expect": [
+    "ORK"
+   ]
+  },
+  {
+   "id": "limerick-ireland",
+   "row": {
+    "location": "Limerick",
+    "country": "Ireland"
+   },
+   "expect": [
+    "SNN"
+   ]
+  },
+  {
+   "id": "sheffield-united-kingdom",
+   "row": {
+    "location": "Sheffield",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "MAN",
+    "EMA",
+    "LBA"
+   ]
+  },
+  {
+   "id": "nottingham-united-kingdom",
+   "row": {
+    "location": "Nottingham",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "EMA"
+   ]
+  },
+  {
+   "id": "liverpool-united-kingdom",
+   "row": {
+    "location": "Liverpool",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "LPL",
+    "MAN"
+   ]
+  },
+  {
+   "id": "southampton-united-kingdom",
+   "row": {
+    "location": "Southampton",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "SOU",
+    "LHR",
+    "LGW"
+   ]
+  },
+  {
+   "id": "exeter-united-kingdom",
+   "row": {
+    "location": "Exeter",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "EXT",
+    "BRS"
+   ]
+  },
+  {
+   "id": "norwich-united-kingdom",
+   "row": {
+    "location": "Norwich",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "NWI",
+    "STN"
+   ]
+  },
+  {
+   "id": "swansea-united-kingdom",
+   "row": {
+    "location": "Swansea",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "CWL",
+    "BRS"
+   ]
+  },
+  {
+   "id": "st-andrews-united-kingdom",
+   "row": {
+    "location": "St Andrews",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "EDI",
+    "DND"
+   ]
+  },
+  {
+   "id": "coimbra-portugal",
+   "row": {
+    "location": "Coimbra",
+    "country": "Portugal"
+   },
+   "expect": [
+    "OPO",
+    "LIS"
+   ]
+  },
+  {
+   "id": "faro-portugal",
+   "row": {
+    "location": "Faro",
+    "country": "Portugal"
+   },
+   "expect": [
+    "FAO"
+   ]
+  },
+  {
+   "id": "thessaloniki-greece",
+   "row": {
+    "location": "Thessaloniki",
+    "country": "Greece"
+   },
+   "expect": [
+    "SKG"
+   ]
+  },
+  {
+   "id": "split-croatia",
+   "row": {
+    "location": "Split",
+    "country": "Croatia"
+   },
+   "expect": [
+    "SPU"
+   ]
+  },
+  {
+   "id": "zagreb-croatia",
+   "row": {
+    "location": "Zagreb",
+    "country": "Croatia"
+   },
+   "expect": [
+    "ZAG"
+   ]
+  },
+  {
+   "id": "ljubljana-slovenia",
+   "row": {
+    "location": "Ljubljana",
+    "country": "Slovenia"
+   },
+   "expect": [
+    "LJU"
+   ]
+  },
+  {
+   "id": "bratislava-slovakia",
+   "row": {
+    "location": "Bratislava",
+    "country": "Slovakia"
+   },
+   "expect": [
+    "BTS",
+    "VIE"
+   ]
+  },
+  {
+   "id": "brno-czech-republic",
+   "row": {
+    "location": "Brno",
+    "country": "Czech Republic"
+   },
+   "expect": [
+    "BRQ",
+    "VIE",
+    "PRG"
+   ]
+  },
+  {
+   "id": "cluj-napoca-romania",
+   "row": {
+    "location": "Cluj-Napoca",
+    "country": "Romania"
+   },
+   "expect": [
+    "CLJ"
+   ]
+  },
+  {
+   "id": "bucharest-romania",
+   "row": {
+    "location": "Bucharest",
+    "country": "Romania"
+   },
+   "expect": [
+    "OTP",
+    "BBU"
+   ]
+  },
+  {
+   "id": "sofia-bulgaria",
+   "row": {
+    "location": "Sofia",
+    "country": "Bulgaria"
+   },
+   "expect": [
+    "SOF"
+   ]
+  },
+  {
+   "id": "riga-latvia",
+   "row": {
+    "location": "Riga",
+    "country": "Latvia"
+   },
+   "expect": [
+    "RIX"
+   ]
+  },
+  {
+   "id": "vilnius-lithuania",
+   "row": {
+    "location": "Vilnius",
+    "country": "Lithuania"
+   },
+   "expect": [
+    "VNO"
+   ]
+  },
+  {
+   "id": "tallinn-estonia",
+   "row": {
+    "location": "Tallinn",
+    "country": "Estonia"
+   },
+   "expect": [
+    "TLL"
+   ]
+  },
+  {
+   "id": "pittsburgh-pa-united-states",
+   "row": {
+    "location": "Pittsburgh, PA",
+    "country": "United States"
+   },
+   "expect": [
+    "PIT"
+   ]
+  },
+  {
+   "id": "cleveland-oh-united-states",
+   "row": {
+    "location": "Cleveland, OH",
+    "country": "United States"
+   },
+   "expect": [
+    "CLE"
+   ]
+  },
+  {
+   "id": "san-diego-ca-united-states",
+   "row": {
+    "location": "San Diego, CA",
+    "country": "United States"
+   },
+   "expect": [
+    "SAN"
+   ]
+  },
+  {
+   "id": "sacramento-ca-united-states",
+   "row": {
+    "location": "Sacramento, CA",
+    "country": "United States"
+   },
+   "expect": [
+    "SMF"
+   ]
+  },
+  {
+   "id": "santa-barbara-ca-united-states",
+   "row": {
+    "location": "Santa Barbara, CA",
+    "country": "United States"
+   },
+   "expect": [
+    "SBA",
+    "LAX"
+   ]
+  },
+  {
+   "id": "madison-wi-united-states",
+   "row": {
+    "location": "Madison, WI",
+    "country": "United States"
+   },
+   "expect": [
+    "MSN"
+   ]
+  },
+  {
+   "id": "albany-ny-united-states",
+   "row": {
+    "location": "Albany, NY",
+    "country": "United States"
+   },
+   "expect": [
+    "ALB"
+   ]
+  },
+  {
+   "id": "ithaca-ny-united-states",
+   "row": {
+    "location": "Ithaca, NY",
+    "country": "United States"
+   },
+   "expect": [
+    "ITH",
+    "SYR"
+   ]
+  },
+  {
+   "id": "new-haven-ct-united-states",
+   "row": {
+    "location": "New Haven, CT",
+    "country": "United States"
+   },
+   "expect": [
+    "HVN",
+    "BDL",
+    "JFK",
+    "LGA"
+   ]
+  },
+  {
+   "id": "providence-ri-united-states",
+   "row": {
+    "location": "Providence, RI",
+    "country": "United States"
+   },
+   "expect": [
+    "PVD",
+    "BOS"
+   ]
+  },
+  {
+   "id": "durham-nc-united-states",
+   "row": {
+    "location": "Durham, NC",
+    "country": "United States"
+   },
+   "expect": [
+    "RDU"
+   ]
+  },
+  {
+   "id": "charlotte-nc-united-states",
+   "row": {
+    "location": "Charlotte, NC",
+    "country": "United States"
+   },
+   "expect": [
+    "CLT"
+   ]
+  },
+  {
+   "id": "orlando-fl-united-states",
+   "row": {
+    "location": "Orlando, FL",
+    "country": "United States"
+   },
+   "expect": [
+    "MCO"
+   ]
+  },
+  {
+   "id": "tampa-fl-united-states",
+   "row": {
+    "location": "Tampa, FL",
+    "country": "United States"
+   },
+   "expect": [
+    "TPA"
+   ]
+  },
+  {
+   "id": "san-antonio-tx-united-states",
+   "row": {
+    "location": "San Antonio, TX",
+    "country": "United States"
+   },
+   "expect": [
+    "SAT"
+   ]
+  },
+  {
+   "id": "minneapolis-mn-united-states",
+   "row": {
+    "location": "Minneapolis, MN",
+    "country": "United States"
+   },
+   "expect": [
+    "MSP"
+   ]
+  },
+  {
+   "id": "st-paul-mn-united-states",
+   "row": {
+    "location": "St. Paul, MN",
+    "country": "United States"
+   },
+   "expect": [
+    "MSP"
+   ]
+  },
+  {
+   "id": "detroit-mi-united-states",
+   "row": {
+    "location": "Detroit, MI",
+    "country": "United States"
+   },
+   "expect": [
+    "DTW"
+   ]
+  },
+  {
+   "id": "baltimore-md-united-states",
+   "row": {
+    "location": "Baltimore, MD",
+    "country": "United States"
+   },
+   "expect": [
+    "BWI"
+   ]
+  },
+  {
+   "id": "philadelphia-pa-united-states",
+   "row": {
+    "location": "Philadelphia, PA",
+    "country": "United States"
+   },
+   "expect": [
+    "PHL"
+   ]
+  },
+  {
+   "id": "oakland-ca-united-states",
+   "row": {
+    "location": "Oakland, CA",
+    "country": "United States"
+   },
+   "expect": [
+    "OAK",
+    "SFO"
+   ]
+  },
+  {
+   "id": "pasadena-ca-united-states",
+   "row": {
+    "location": "Pasadena, CA",
+    "country": "United States"
+   },
+   "expect": [
+    "BUR",
+    "LAX"
+   ]
+  },
+  {
+   "id": "irvine-ca-united-states",
+   "row": {
+    "location": "Irvine, CA",
+    "country": "United States"
+   },
+   "expect": [
+    "SNA",
+    "LAX"
+   ]
+  },
+  {
+   "id": "redmond-wa-united-states",
+   "row": {
+    "location": "Redmond, WA",
+    "country": "United States"
+   },
+   "expect": [
+    "SEA"
+   ]
+  },
+  {
+   "id": "bellevue-wa-united-states",
+   "row": {
+    "location": "Bellevue, WA",
+    "country": "United States"
+   },
+   "expect": [
+    "SEA"
+   ]
+  },
+  {
+   "id": "montreal-canada",
+   "row": {
+    "location": "Montreal",
+    "country": "Canada"
+   },
+   "expect": [
+    "YUL"
+   ]
+  },
+  {
+   "id": "edmonton-ab-canada",
+   "row": {
+    "location": "Edmonton, AB",
+    "country": "Canada"
+   },
+   "expect": [
+    "YEG"
+   ]
+  },
+  {
+   "id": "winnipeg-canada",
+   "row": {
+    "location": "Winnipeg",
+    "country": "Canada"
+   },
+   "expect": [
+    "YWG"
+   ]
+  },
+  {
+   "id": "waterloo-on-canada",
+   "row": {
+    "location": "Waterloo, ON",
+    "country": "Canada"
+   },
+   "expect": [
+    "YKF",
+    "YYZ"
+   ]
+  },
+  {
+   "id": "kelowna-bc-canada",
+   "row": {
+    "location": "Kelowna, BC",
+    "country": "Canada"
+   },
+   "expect": [
+    "YLW"
+   ]
+  },
+  {
+   "id": "canberra-australia",
+   "row": {
+    "location": "Canberra",
+    "country": "Australia"
+   },
+   "expect": [
+    "CBR"
+   ]
+  },
+  {
+   "id": "gold-coast-qld-australia",
+   "row": {
+    "location": "Gold Coast, QLD",
+    "country": "Australia"
+   },
+   "expect": [
+    "OOL",
+    "BNE"
+   ]
+  },
+  {
+   "id": "darwin-australia",
+   "row": {
+    "location": "Darwin",
+    "country": "Australia"
+   },
+   "expect": [
+    "DRW"
+   ]
+  },
+  {
+   "id": "christchurch-new-zealand",
+   "row": {
+    "location": "Christchurch",
+    "country": "New Zealand"
+   },
+   "expect": [
+    "CHC"
+   ]
+  },
+  {
+   "id": "dunedin-new-zealand",
+   "row": {
+    "location": "Dunedin",
+    "country": "New Zealand"
+   },
+   "expect": [
+    "DUD"
+   ]
+  },
+  {
+   "id": "pune-india",
+   "row": {
+    "location": "Pune",
+    "country": "India"
+   },
+   "expect": [
+    "PNQ"
+   ]
+  },
+  {
+   "id": "chennai-india",
+   "row": {
+    "location": "Chennai",
+    "country": "India"
+   },
+   "expect": [
+    "MAA"
+   ]
+  },
+  {
+   "id": "kolkata-india",
+   "row": {
+    "location": "Kolkata",
+    "country": "India"
+   },
+   "expect": [
+    "CCU"
+   ]
+  },
+  {
+   "id": "hyderabad-india",
+   "row": {
+    "location": "Hyderabad",
+    "country": "India"
+   },
+   "expect": [
+    "HYD"
+   ]
+  },
+  {
+   "id": "ahmedabad-india",
+   "row": {
+    "location": "Ahmedabad",
+    "country": "India"
+   },
+   "expect": [
+    "AMD"
+   ]
+  },
+  {
+   "id": "kochi-india",
+   "row": {
+    "location": "Kochi",
+    "country": "India"
+   },
+   "expect": [
+    "COK"
+   ]
+  },
+  {
+   "id": "shenzhen-china",
+   "row": {
+    "location": "Shenzhen",
+    "country": "China"
+   },
+   "expect": [
+    "SZX",
+    "HKG"
+   ]
+  },
+  {
+   "id": "chengdu-china",
+   "row": {
+    "location": "Chengdu",
+    "country": "China"
+   },
+   "expect": [
+    "CTU",
+    "TFU"
+   ]
+  },
+  {
+   "id": "hangzhou-china",
+   "row": {
+    "location": "Hangzhou",
+    "country": "China"
+   },
+   "expect": [
+    "HGH"
+   ]
+  },
+  {
+   "id": "busan-south-korea",
+   "row": {
+    "location": "Busan",
+    "country": "South Korea"
+   },
+   "expect": [
+    "PUS"
+   ]
+  },
+  {
+   "id": "fukuoka-japan",
+   "row": {
+    "location": "Fukuoka",
+    "country": "Japan"
+   },
+   "expect": [
+    "FUK"
+   ]
+  },
+  {
+   "id": "sapporo-japan",
+   "row": {
+    "location": "Sapporo",
+    "country": "Japan"
+   },
+   "expect": [
+    "CTS",
+    "OKD"
+   ]
+  },
+  {
+   "id": "nagoya-japan",
+   "row": {
+    "location": "Nagoya",
+    "country": "Japan"
+   },
+   "expect": [
+    "NGO",
+    "NKM"
+   ]
+  },
+  {
+   "id": "cebu-philippines",
+   "row": {
+    "location": "Cebu",
+    "country": "Philippines"
+   },
+   "expect": [
+    "CEB"
+   ]
+  },
+  {
+   "id": "hanoi-vietnam",
+   "row": {
+    "location": "Hanoi",
+    "country": "Vietnam"
+   },
+   "expect": [
+    "HAN"
+   ]
+  },
+  {
+   "id": "phnom-penh-cambodia",
+   "row": {
+    "location": "Phnom Penh",
+    "country": "Cambodia"
+   },
+   "expect": [
+    "PNH",
+    "KTI"
+   ]
+  },
+  {
+   "id": "yangon-myanmar",
+   "row": {
+    "location": "Yangon",
+    "country": "Myanmar"
+   },
+   "expect": [
+    "RGN"
+   ]
+  },
+  {
+   "id": "chiang-mai-thailand",
+   "row": {
+    "location": "Chiang Mai",
+    "country": "Thailand"
+   },
+   "expect": [
+    "CNX"
+   ]
+  },
+  {
+   "id": "penang-malaysia",
+   "row": {
+    "location": "Penang",
+    "country": "Malaysia"
+   },
+   "expect": [
+    "PEN"
+   ]
+  },
+  {
+   "id": "bali-indonesia",
+   "row": {
+    "location": "Bali",
+    "country": "Indonesia"
+   },
+   "expect": [
+    "DPS"
+   ]
+  },
+  {
+   "id": "surabaya-indonesia",
+   "row": {
+    "location": "Surabaya",
+    "country": "Indonesia"
+   },
+   "expect": [
+    "SUB"
+   ]
+  },
+  {
+   "id": "abu-dhabi-united-arab-emirates",
+   "row": {
+    "location": "Abu Dhabi",
+    "country": "United Arab Emirates"
+   },
+   "expect": [
+    "AUH"
+   ]
+  },
+  {
+   "id": "sharjah-united-arab-emirates",
+   "row": {
+    "location": "Sharjah",
+    "country": "United Arab Emirates"
+   },
+   "expect": [
+    "SHJ",
+    "DXB"
+   ]
+  },
+  {
+   "id": "muscat-oman",
+   "row": {
+    "location": "Muscat",
+    "country": "Oman"
+   },
+   "expect": [
+    "MCT"
+   ]
+  },
+  {
+   "id": "amman-jordan",
+   "row": {
+    "location": "Amman",
+    "country": "Jordan"
+   },
+   "expect": [
+    "AMM"
+   ]
+  },
+  {
+   "id": "beirut-lebanon",
+   "row": {
+    "location": "Beirut",
+    "country": "Lebanon"
+   },
+   "expect": [
+    "BEY"
+   ]
+  },
+  {
+   "id": "jeddah-saudi-arabia",
+   "row": {
+    "location": "Jeddah",
+    "country": "Saudi Arabia"
+   },
+   "expect": [
+    "JED"
+   ]
+  },
+  {
+   "id": "durban-south-africa",
+   "row": {
+    "location": "Durban",
+    "country": "South Africa"
+   },
+   "expect": [
+    "DUR"
+   ]
+  },
+  {
+   "id": "pretoria-south-africa",
+   "row": {
+    "location": "Pretoria",
+    "country": "South Africa"
+   },
+   "expect": [
+    "JNB"
+   ]
+  },
+  {
+   "id": "stellenbosch-south-africa",
+   "row": {
+    "location": "Stellenbosch",
+    "country": "South Africa"
+   },
+   "expect": [
+    "CPT"
+   ]
+  },
+  {
+   "id": "marrakech-morocco",
+   "row": {
+    "location": "Marrakech",
+    "country": "Morocco"
+   },
+   "expect": [
+    "RAK"
+   ]
+  },
+  {
+   "id": "abuja-nigeria",
+   "row": {
+    "location": "Abuja",
+    "country": "Nigeria"
+   },
+   "expect": [
+    "ABV"
+   ]
+  },
+  {
+   "id": "dakar-senegal",
+   "row": {
+    "location": "Dakar",
+    "country": "Senegal"
+   },
+   "expect": [
+    "DSS"
+   ]
+  },
+  {
+   "id": "lusaka-zambia",
+   "row": {
+    "location": "Lusaka",
+    "country": "Zambia"
+   },
+   "expect": [
+    "LUN"
+   ]
+  },
+  {
+   "id": "harare-zimbabwe",
+   "row": {
+    "location": "Harare",
+    "country": "Zimbabwe"
+   },
+   "expect": [
+    "HRE"
+   ]
+  },
+  {
+   "id": "mombasa-kenya",
+   "row": {
+    "location": "Mombasa",
+    "country": "Kenya"
+   },
+   "expect": [
+    "MBA"
+   ]
+  },
+  {
+   "id": "zanzibar-tanzania",
+   "row": {
+    "location": "Zanzibar",
+    "country": "Tanzania"
+   },
+   "expect": [
+    "ZNZ"
+   ]
+  },
+  {
+   "id": "windhoek-namibia",
+   "row": {
+    "location": "Windhoek",
+    "country": "Namibia"
+   },
+   "expect": [
+    "WDH"
+   ]
+  },
+  {
+   "id": "gaborone-botswana",
+   "row": {
+    "location": "Gaborone",
+    "country": "Botswana"
+   },
+   "expect": [
+    "GBE"
+   ]
+  },
+  {
+   "id": "medellin-colombia",
+   "row": {
+    "location": "Medellin",
+    "country": "Colombia"
+   },
+   "expect": [
+    "MDE",
+    "EOH"
+   ]
+  },
+  {
+   "id": "cartagena-colombia",
+   "row": {
+    "location": "Cartagena",
+    "country": "Colombia"
+   },
+   "expect": [
+    "CTG"
+   ]
+  },
+  {
+   "id": "guadalajara-mexico",
+   "row": {
+    "location": "Guadalajara",
+    "country": "Mexico"
+   },
+   "expect": [
+    "GDL"
+   ]
+  },
+  {
+   "id": "monterrey-mexico",
+   "row": {
+    "location": "Monterrey",
+    "country": "Mexico"
+   },
+   "expect": [
+    "MTY"
+   ]
+  },
+  {
+   "id": "cancun-mexico",
+   "row": {
+    "location": "Cancun",
+    "country": "Mexico"
+   },
+   "expect": [
+    "CUN"
+   ]
+  },
+  {
+   "id": "montevideo-uruguay",
+   "row": {
+    "location": "Montevideo",
+    "country": "Uruguay"
+   },
+   "expect": [
+    "MVD"
+   ]
+  },
+  {
+   "id": "asuncion-paraguay",
+   "row": {
+    "location": "Asuncion",
+    "country": "Paraguay"
+   },
+   "expect": [
+    "ASU"
+   ]
+  },
+  {
+   "id": "recife-brazil",
+   "row": {
+    "location": "Recife",
+    "country": "Brazil"
+   },
+   "expect": [
+    "REC"
+   ]
+  },
+  {
+   "id": "porto-alegre-brazil",
+   "row": {
+    "location": "Porto Alegre",
+    "country": "Brazil"
+   },
+   "expect": [
+    "POA"
+   ]
+  },
+  {
+   "id": "brasilia-brazil",
+   "row": {
+    "location": "Brasilia",
+    "country": "Brazil"
+   },
+   "expect": [
+    "BSB"
+   ]
+  },
+  {
+   "id": "mendoza-argentina",
+   "row": {
+    "location": "Mendoza",
+    "country": "Argentina"
+   },
+   "expect": [
+    "MDZ"
+   ]
+  },
+  {
+   "id": "san-juan-puerto-rico",
+   "row": {
+    "location": "San Juan",
+    "country": "Puerto Rico"
+   },
+   "expect": [
+    "SJU"
+   ]
+  },
+  {
+   "id": "havana-cuba",
+   "row": {
+    "location": "Havana",
+    "country": "Cuba"
+   },
+   "expect": [
+    "HAV"
+   ]
+  },
+  {
+   "id": "santo-domingo-dominican-republic",
+   "row": {
+    "location": "Santo Domingo",
+    "country": "Dominican Republic"
+   },
+   "expect": [
+    "SDQ"
+   ]
+  },
+  {
+   "id": "guatemala-city-guatemala",
+   "row": {
+    "location": "Guatemala City",
+    "country": "Guatemala"
+   },
+   "expect": [
+    "GUA"
+   ]
+  },
+  {
+   "id": "san-salvador-el-salvador",
+   "row": {
+    "location": "San Salvador",
+    "country": "El Salvador"
+   },
+   "expect": [
+    "SAL"
+   ]
+  },
+  {
+   "id": "bruxelles",
+   "row": {
+    "location": "Bruxelles"
+   },
+   "expect": [
+    "BRU",
+    "CRL"
+   ]
+  },
+  {
+   "id": "mailand-italy",
+   "row": {
+    "location": "Mailand",
+    "country": "Italy"
+   },
+   "expect": [
+    "MXP",
+    "LIN",
+    "BGY"
+   ]
+  },
+  {
+   "id": "wrocaw",
+   "row": {
+    "location": "Wrocław"
+   },
+   "expect": [
+    "WRO"
+   ]
+  },
+  {
+   "id": "den-bosch-netherlands",
+   "row": {
+    "location": "Den Bosch",
+    "country": "Netherlands"
+   },
+   "expect": [
+    "EIN",
+    "AMS"
+   ]
+  },
+  {
+   "id": "peking",
+   "row": {
+    "location": "Peking"
+   },
+   "expect": [
+    "PEK",
+    "PKX"
+   ]
+  },
+  {
+   "id": "canton-china",
+   "row": {
+    "location": "Canton",
+    "country": "China"
+   },
+   "expect": [
+    "CAN"
+   ]
+  },
+  {
+   "id": "leghorn-italy",
+   "row": {
+    "location": "Leghorn",
+    "country": "Italy"
+   },
+   "expect": [
+    "PSA",
+    "FLR"
+   ]
+  },
+  {
+   "id": "aachen-germany",
+   "row": {
+    "location": "Aachen",
+    "country": "Germany"
+   },
+   "expect": [
+    "CGN",
+    "DUS",
+    "MST",
+    "LGG",
+    "EIN",
+    "BRU"
+   ]
+  },
+  {
+   "id": "springfield-ma-united-states",
+   "row": {
+    "location": "Springfield, MA",
+    "country": "United States"
+   },
+   "expect": [
+    "BDL"
+   ]
+  },
+  {
+   "id": "portland-oregon",
+   "row": {
+    "location": "Portland, Oregon"
+   },
+   "expect": [
+    "PDX"
+   ]
+  },
+  {
+   "id": "austin",
+   "row": {
+    "location": "Austin"
+   },
+   "expect": [
+    "AUS"
+   ]
+  },
+  {
+   "id": "boston-lincolnshire-united-kingdom",
+   "row": {
+    "location": "Boston, Lincolnshire",
+    "country": "United Kingdom"
+   },
+   "expect": [
+    "EMA",
+    "MAN",
+    "LHR",
+    "NWI",
+    "HUY"
+   ]
+  },
+  {
+   "id": "newcastle",
+   "row": {
+    "location": "Newcastle"
+   },
+   "expect": [
+    "NCL",
+    "NTL"
+   ],
+   "mustFlag": true
+  },
+  {
+   "id": "victoria",
+   "row": {
+    "location": "Victoria"
+   },
+   "expect": [
+    "YYJ",
+    "MEL",
+    "SEZ",
+    "HKG"
+   ],
+   "mustFlag": true
+  },
+  {
+   "id": "wellington",
+   "row": {
+    "location": "Wellington"
+   },
+   "expect": [
+    "WLG"
+   ]
+  },
+  {
+   "id": "halifax",
+   "row": {
+    "location": "Halifax"
+   },
+   "expect": [
+    "YHZ",
+    "LBA",
+    "MAN"
+   ],
+   "mustFlag": true
+  },
+  {
+   "id": "remote-eu",
+   "row": {
+    "location": "Remote - EU"
+   },
+   "expect": []
+  },
+  {
+   "id": "hybrid",
+   "row": {
+    "location": "Hybrid"
+   },
+   "expect": []
+  },
+  {
+   "id": "multiple",
+   "row": {
+    "location": "Multiple"
+   },
+   "expect": []
+  },
+  {
+   "id": "worldwide",
+   "row": {
+    "location": "Worldwide"
+   },
+   "expect": []
   }
  ]
 }

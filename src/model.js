@@ -5,6 +5,7 @@ import {
   AIRPORTS,
   airportByCode,
   airportForCode,
+  allAirports,
   canonicalCountry,
   guessAirport,
   haversineKm,
@@ -199,13 +200,76 @@ export function findAirport(query) {
 }
 
 // Every candidate city, lowest total emissions first. With `codes` (an array or Set of airport
-// codes) that is not empty, only those airports are scored.
+// codes) that is not empty, exactly those airports are scored, whether or not they are hosts;
+// codes that match no airport are ignored. Without codes, the host cities are scored.
 export function scoreAll(groups, policy, codes) {
-  const wanted = codes ? new Set(codes) : null;
-  const candidates = wanted && wanted.size ? AIRPORTS.filter((airport) => wanted.has(airport.code)) : AIRPORTS;
+  const wanted = codes ? [...new Set(codes)] : [];
+  const candidates = wanted.length ? wanted.map((code) => airportByCode(code)).filter(Boolean) : AIRPORTS;
   return candidates.map((airport) => scoreDestination(airport, groups, policy)).sort(
     (a, b) => a.totalEmissionsKg - b.totalEmissionsKg
   );
+}
+
+// The airport codes to rank: with the shortlist filter on, exactly the shortlist; with it off, the
+// host cities plus any shortlisted airport that is not a host.
+export function destinationCodes(shortlistCodes, only) {
+  if (only && shortlistCodes.length) return [...new Set(shortlistCodes)];
+  return [...new Set([...AIRPORTS.map((airport) => airport.code), ...shortlistCodes])];
+}
+
+// ---- Airport picker labels -----------------------------------------------------------------------
+
+const GENERIC_AIRPORT_WORDS = /\b(international|intl|airport|airfield|aerodrome|regional|municipal|field)\b/g;
+
+// "City, Country \u2014 Airport name (CODE)". The airport name is left out when it only repeats the city.
+export function airportLabel(airport) {
+  const city = airport.city;
+  const stripped = normalize(airport.name || "").replace(GENERIC_AIRPORT_WORDS, "").replace(/\s+/g, " ").trim();
+  const repeatsCity = !stripped || stripped === normalize(city);
+  const name = repeatsCity ? "" : ` \u2014 ${airport.name}`;
+  return `${city}, ${airport.country}${name} (${airport.code})`;
+}
+
+// Every airport with its label, sorted by city then code.
+export function airportChoices(airports = allAirports()) {
+  return [...airports]
+    .sort((a, b) => a.city.localeCompare(b.city) || a.code.localeCompare(b.code))
+    .map((airport) => ({ airport, label: airportLabel(airport) }));
+}
+
+// Turns what someone typed or picked into an airport: a trailing (CODE), else an exact label, else
+// findAirport. `choices` is the list from airportChoices.
+export function resolveAirportInput(text, choices) {
+  const value = String(text ?? "").trim();
+  if (!value) return null;
+  const codeInLabel = value.match(/\(([A-Za-z]{3})\)\s*$/);
+  if (codeInLabel) {
+    const byCode = airportByCode(codeInLabel[1].toUpperCase());
+    if (byCode) return byCode;
+  }
+  const lower = value.toLowerCase();
+  const listed = choices.find((choice) => choice.label.toLowerCase() === lower);
+  return listed ? listed.airport : findAirport(value);
+}
+
+// One short line for the review panel: how a group was matched, with the matched place when it
+// differs from what was typed and the distance when the reason doesn't already state it.
+export function reviewDetail(group) {
+  const reason = group.reason || "";
+  const parts = [];
+  const place = group.place;
+  const placeName = typeof place === "string" ? place : place?.name || place?.city || "";
+  // "Portland, OR" found as Portland needs no arrow; a typo or local name ("Munchen") does.
+  const typedName = String(group.inputLocation || "").split(",")[0];
+  if (placeName && normalize(placeName) !== normalize(typedName)) {
+    parts.push(`${group.inputLocation} \u2192 ${placeName}`);
+  }
+  let text = reason;
+  if (Number.isFinite(group.distanceKm) && group.distanceKm > 0 && !/\bkm\b/.test(reason)) {
+    text = `${reason}${reason ? " \u00b7 " : ""}airport ${Math.round(group.distanceKm)} km away`;
+  }
+  if (text) parts.push(text);
+  return parts.join(" \u00b7 ");
 }
 
 const SORT_VALUES = {

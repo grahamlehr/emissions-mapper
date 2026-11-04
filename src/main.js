@@ -6,7 +6,11 @@ import {
   SAMPLE_ROWS,
   assumptionLines,
   airportByCode,
-  hostByCode,
+  airportChoices,
+  airportLabel,
+  destinationCodes,
+  resolveAirportInput,
+  reviewDetail,
   comparisonCsv,
   installDataset,
   installPlaces,
@@ -63,7 +67,7 @@ function loadShortlist() {
     if (!saved || !Array.isArray(saved.codes)) return;
     const codes = [];
     for (const code of saved.codes) {
-      if (typeof code === "string" && hostByCode(code) && !codes.includes(code)) codes.push(code);
+      if (typeof code === "string" && airportByCode(code) && !codes.includes(code)) codes.push(code);
     }
     state.shortlist.codes = codes;
     state.shortlist.only = Boolean(saved.only) && codes.length > 0;
@@ -78,11 +82,6 @@ function saveShortlist() {
   } catch {
     // Not being able to remember the shortlist is not worth interrupting anyone for.
   }
-}
-
-// findAirport now accepts any airport, but the shortlist only scores hosts until PR D widens it.
-function hostOnly(airport) {
-  return airport ? hostByCode(airport.code) : null;
 }
 
 function isFiltering() {
@@ -222,7 +221,7 @@ function placedGroups() {
 // With nothing placed there is nothing to rank, so the scores stay empty.
 function calculateScores() {
   state.scores = placedGroups().length
-    ? scoreAll(state.groups, getPolicy(), isFiltering() ? state.shortlist.codes : undefined)
+    ? scoreAll(state.groups, getPolicy(), destinationCodes(state.shortlist.codes, isFiltering()))
     : [];
   if (state.scores.length && !state.scores.some((score) => score.destination.code === state.selectedCode)) {
     state.selectedCode = state.scores[0].destination.code;
@@ -374,18 +373,6 @@ const CONFIDENCE_TAGS = {
 
 const CONFIDENCE_ORDER = { unplaced: 0, medium: 1, high: 2, manual: 2 };
 
-// Built by buildAirportLists() once the airport data has loaded.
-let AIRPORT_OPTIONS = "";
-
-// The list above holds only host cities, so a group matched to any other airport gets its own
-// option at the top; otherwise the select would show nothing.
-function matchedAirportOption(group) {
-  if (!group.airportCode || hostByCode(group.airportCode)) return "";
-  const airport = airportByCode(group.airportCode);
-  if (!airport) return "";
-  return `<option value="${airport.code}">${escapeHtml(airport.name)}, ${escapeHtml(airport.country)} (${airport.code})</option>`;
-}
-
 function applyConfidenceTag(tag, confidence) {
   const info = CONFIDENCE_TAGS[confidence] || CONFIDENCE_TAGS.high;
   tag.className = info.className;
@@ -442,31 +429,59 @@ function renderReview() {
   for (const { group } of ordered) {
     const row = document.createElement("article");
     row.className = "review-row";
+    const detail = reviewDetail(group);
     row.innerHTML = `
       <div class="review-head">
         <div class="review-place">
           <strong>${escapeHtml(group.inputLocation)}</strong>
           <span class="review-people">${group.people.toLocaleString()} people</span>
-          ${group.reason ? `<span class="review-reason">${escapeHtml(group.reason)}</span>` : ""}
+          <span class="review-reason"${detail ? "" : " hidden"}>${escapeHtml(detail)}</span>
         </div>
         <span></span>
       </div>
-      <select class="sg-select" aria-label="Assumed airport for ${escapeHtml(group.inputLocation)}">
-        ${group.airportCode ? "" : `<option value="">Choose an airport…</option>`}${matchedAirportOption(group)}${AIRPORT_OPTIONS}
-      </select>
+      <input class="sg-input" type="text" list="shortlistOptions" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search airports" aria-label="Airport for ${escapeHtml(group.inputLocation)}" />
+      <p class="review-message" role="status"></p>
     `;
     const tag = row.querySelector(".review-head > span:last-child");
-    const select = row.querySelector("select");
-    select.value = group.airportCode || "";
+    const input = row.querySelector("input");
+    const message = row.querySelector(".review-message");
+    const reasonLine = row.querySelector(".review-reason");
+    const labelFor = () => (group.airportCode ? airportLabel(airportByCode(group.airportCode)) : "");
+    input.value = labelFor();
     applyConfidenceTag(tag, group.confidence);
-    select.addEventListener("change", () => {
-      group.airportCode = select.value || null;
-      group.confidence = select.value ? "manual" : "unplaced";
-      group.reason = select.value ? "chosen by you" : "no match";
-      const reason = row.querySelector(".review-reason");
-      if (reason) reason.textContent = group.reason;
+
+    // Commits on change (pick or Enter) and on blur; the row itself is never rebuilt, so focus stays.
+    const commit = () => {
+      const value = input.value.trim();
+      if (value === labelFor()) return;
+      if (!value) {
+        group.airportCode = null;
+        group.confidence = "unplaced";
+        group.reason = "no match";
+      } else {
+        const airport = resolveAirportInput(value, AIRPORT_CHOICES);
+        if (!airport) {
+          message.textContent = `No airport matches "${value}". Pick one from the list.`;
+          input.value = labelFor();
+          return;
+        }
+        group.airportCode = airport.code;
+        group.confidence = "manual";
+        group.reason = "chosen by you";
+      }
+      group.place = null;
+      group.distanceKm = null;
+      message.textContent = "";
+      input.value = labelFor();
+      reasonLine.textContent = group.reason;
+      reasonLine.hidden = false;
       applyConfidenceTag(tag, group.confidence);
       updateAll();
+    };
+    input.addEventListener("change", commit);
+    input.addEventListener("blur", commit);
+    input.addEventListener("input", () => {
+      message.textContent = "";
     });
     els.reviewList.append(row);
   }
@@ -997,22 +1012,21 @@ function renderMethod(policy) {
     : "One-way journeys are counted. Switch on Return trips to count both ways (\u00d72).";
 }
 
-let SHORTLIST_OPTIONS = [];
+// Built once when the airport data has loaded; one datalist serves the shortlist and every review row.
+let AIRPORT_CHOICES = [];
 
 function buildAirportLists() {
-  const sorted = [...AIRPORTS].sort((a, b) => a.city.localeCompare(b.city));
-  AIRPORT_OPTIONS = sorted
-    .map((airport) => `<option value="${airport.code}">${airport.city}, ${airport.country} (${airport.code})</option>`)
-    .join("");
-  SHORTLIST_OPTIONS = sorted.map((airport) => ({ airport, label: `${airport.city}, ${airport.country} (${airport.code})` }));
+  AIRPORT_CHOICES = airportChoices();
 }
 
 function fillShortlistOptions() {
-  for (const { label } of SHORTLIST_OPTIONS) {
+  const fragment = document.createDocumentFragment();
+  for (const { label } of AIRPORT_CHOICES) {
     const option = document.createElement("option");
     option.value = label;
-    els.shortlistOptions.append(option);
+    fragment.append(option);
   }
+  els.shortlistOptions.replaceChildren(fragment);
 }
 
 // Updates everything about the shortlist except the input, so typing is never interrupted.
@@ -1067,11 +1081,9 @@ function removeFromShortlist(code) {
 function submitShortlist() {
   const value = els.shortlistInput.value.trim();
   if (!value) return;
-  const listed = SHORTLIST_OPTIONS.find((option) => option.label.toLowerCase() === value.toLowerCase());
-  const codeInLabel = value.match(/\(([A-Za-z]{3})\)\s*$/);
-  const airport = (codeInLabel && hostByCode(codeInLabel[1].toUpperCase())) || listed?.airport || hostOnly(findAirport(value));
+  const airport = resolveAirportInput(value, AIRPORT_CHOICES);
   if (!airport) {
-    els.shortlistMessage.textContent = `Couldn't find "${value}". Pick a city from the list.`;
+    els.shortlistMessage.textContent = `Couldn't find "${value}". Pick an airport from the list.`;
     return;
   }
   if (state.shortlist.codes.includes(airport.code)) {

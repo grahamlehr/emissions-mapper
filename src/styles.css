@@ -34,6 +34,18 @@
   margin-bottom: var(--space-6);
 }
 
+.home-link {
+  display: inline-flex;
+  gap: var(--space-1);
+  text-decoration: none;
+}
+
+.home-link:hover {
+  color: var(--fg-1);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .brand {
   display: flex;
   align-items: center;

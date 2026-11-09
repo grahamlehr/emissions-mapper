@@ -7,7 +7,7 @@ A browser-only tool for choosing where to hold an event. Upload where your atten
 Use it to compare options and guide a planning conversation, not as a post-event carbon report.
 
 ## Using it
-1. Click **Load demo** to try sample data, or upload an Excel or CSV file with the columns `location`, `country`, `people` and, optionally, `airport` (an IATA code).
+1. Click **Load demo** to try sample data, or upload an Excel or CSV file with the columns `location`, `country`, `people` and, optionally, `airport` (an IATA code). To start from a template, download [`examples/attendees-example.csv`](examples/attendees-example.csv) (also linked under the upload box), edit it in Excel and upload it.
 2. Check **Airport assumptions**. Each group says how it was placed, for example "nearest major airport, 25 km". For any group marked "not placed" or "check", search for the right airport by city, name or code. Any of about 3,200 airports with scheduled flights can be picked.
 3. Under **Host cities**, add the places you're considering, by city name or airport code; any airport works, not only the 90 built-in host cities. **Compare shortlist only** compares just those. Switch it off to rank the 90 host cities plus your shortlist, with yours tagged. The shortlist is remembered in this browser.
 4. Adjust the travel policy: the flight length above which business class is assumed, the non-CO2 uplift and return or one-way trips. The emission factors can be changed under **Emission factors (advanced)**.

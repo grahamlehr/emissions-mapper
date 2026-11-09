@@ -83,7 +83,7 @@
               <span>Emission factors (advanced)</span>
               <span class="sg-tag sg-tag--accent" id="customTag" hidden>custom factors</span>
             </summary>
-            <p class="sg-field__hint">Grams of CO2 per passenger-km. Blank or invalid values use the UK Government default.</p>
+            <p class="sg-field__hint">Grams of CO₂ per passenger-km. Blank or invalid values use the UK Government default.</p>
             <div class="policy-grid">
               <div class="sg-field">
                 <label class="sg-label" for="factorDomestic">Domestic (under 500 km)</label>
@@ -112,12 +112,12 @@
             <label class="sg-switch">
               <input type="checkbox" role="switch" id="nonCo2Toggle" checked />
               <span class="sg-switch__track"></span>
-              <span>Include non-CO2 uplift</span>
+              <span>Include non-CO₂ uplift</span>
             </label>
             <button
               class="sg-btn sg-btn--ghost sg-btn--icon sg-btn--sm info-button"
               type="button"
-              aria-label="What is non-CO2 uplift?"
+              aria-label="What is non-CO₂ uplift?"
               aria-describedby="nonCo2Tooltip"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -127,7 +127,7 @@
               </svg>
             </button>
             <span class="popover" id="nonCo2Tooltip" role="tooltip">
-              Multiplies flight CO2 by 1.7, the UK Government's central estimate for the wider climate effect of contrails, nitrogen oxides and water vapour at altitude. The science here is uncertain, so treat it as a rough guide.
+              Multiplies flight CO₂ by 1.7, the UK Government's central estimate for the wider climate effect of contrails, nitrogen oxides and water vapour at altitude. The science here is uncertain, so treat it as a rough guide.
             </span>
           </div>
           <div class="switch-row">
@@ -216,16 +216,16 @@
             <li><strong>Flight type.</strong> Under 500 km uses DESNZ's domestic factor (our cut-off, based on DESNZ's 434 km average UK domestic flight). Under 3,700 km is short-haul; anything longer is long-haul. DESNZ classes UK flights by region, but distance is used here so any pair of airports works.</li>
             <li><strong>Cabin.</strong> Economy, or business when the estimated flight time is over your policy threshold. Flight time is estimated as distance &divide; 850 km/h + 0.55 h.</li>
             <li>
-              <strong>Factors.</strong> Grams of CO2 per passenger-km:
+              <strong>Factors.</strong> Grams of CO₂ per passenger-km:
               <table class="sg-table method-table" id="methodFactors">
                 <thead><tr><th scope="col">Flight type</th><th scope="col" class="num">Economy</th><th scope="col" class="num">Business</th></tr></thead>
                 <tbody></tbody>
               </table>
             </li>
-            <li><strong>Non-CO2.</strong> <span id="methodNonCo2"></span></li>
+            <li><strong>Non-CO₂.</strong> <span id="methodNonCo2"></span></li>
             <li><strong>Trips.</strong> <span id="methodTrips"></span></li>
             <li><strong>Jetlag.</strong> Hours of time-zone difference using standard time. Daylight saving is ignored.</li>
-            <li><strong>Limits.</strong> Every journey is treated as one direct flight from the airport assigned to that group. Only CO2 is counted (methane and nitrous oxide are left out), so results are slightly lower than DESNZ's own CO2e figures. This is for comparing options, not for carbon reporting.</li>
+            <li><strong>Limits.</strong> Every journey is treated as one direct flight from the airport assigned to that group. Only CO₂ is counted (methane and nitrous oxide are left out), so results are slightly lower than DESNZ's own CO₂e figures. This is for comparing options, not for carbon reporting.</li>
           </ol>
           <p class="method-source">
             Source:

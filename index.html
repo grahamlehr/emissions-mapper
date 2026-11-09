@@ -246,7 +246,7 @@
         <div class="map-toolbar">
           <div class="sg-tabs view-tabs" role="tablist" aria-label="View">
             <button class="sg-tab" id="mapTab" type="button" role="tab" aria-selected="true" aria-controls="mapPanel" tabindex="0">Map</button>
-            <button class="sg-tab" id="tableTab" type="button" role="tab" aria-selected="false" aria-controls="tablePanel" tabindex="-1">Table</button>
+            <button class="sg-tab" id="tableTab" type="button" role="tab" aria-selected="false" aria-controls="tablePanel" tabindex="-1">Table &amp; export</button>
           </div>
           <div class="map-controls" id="mapControls">
             <div class="segmented" role="group" aria-label="Map layers">
@@ -298,9 +298,9 @@
           <div class="table-heading">
             <h2 class="table-title" id="tableTitle">Candidate host cities, ranked by total flight emissions</h2>
             <div class="table-export">
-              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="downloadCsv" type="button" disabled>Download CSV</button>
-              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="downloadPng" type="button" disabled>Download PNG</button>
-              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="printTable" type="button" disabled>Print</button>
+              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="downloadCsv" type="button" disabled>Download spreadsheet (CSV)</button>
+              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="downloadPng" type="button" disabled>Save map + table (PNG)</button>
+              <button class="sg-btn sg-btn--sm sg-btn--secondary" id="printTable" type="button" disabled>Print table</button>
             </div>
           </div>
           <p class="table-meta" id="tableMeta"></p>

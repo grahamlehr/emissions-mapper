@@ -95,7 +95,7 @@ function shortlistCityNames() {
 // Columns of the comparison table. `text` columns sort A to Z first; numbers sort lowest first.
 const TABLE_COLUMNS = [
   { key: "city", label: "City", numeric: false },
-  { key: "total", label: "Total t CO2e", numeric: true },
+  { key: "total", label: "Total t CO₂e", numeric: true },
   { key: "perPerson", label: "Per person", numeric: true },
   { key: "hours", label: "Avg flight", numeric: true },
   { key: "jetlag", label: "Avg jetlag", numeric: true },
@@ -716,7 +716,7 @@ function renderTable() {
   const people = scores.length ? scores[0].totalPeople : 0;
   const hours = policy.threshold;
   els.tableMeta.textContent = scores.length
-    ? `${plural(people, "attendee", "attendees")} placed${isFiltering() ? ` \u00b7 shortlist of ${state.shortlist.codes.length}` : ""} \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 ${els.nonCo2.checked ? `non-CO2 \u00d7${DESNZ_2026.nonCo2Multiplier}` : "non-CO2 off"}${factorsAreCustom(policy.factors) ? " \u00b7 custom factors" : ""}`
+    ? `${plural(people, "attendee", "attendees")} placed${isFiltering() ? ` \u00b7 shortlist of ${state.shortlist.codes.length}` : ""} \u00b7 ${policy.returnTrip ? "return journeys" : "one-way journeys"} \u00b7 business class over ${hours} ${hours === 1 ? "hour" : "hours"} \u00b7 ${els.nonCo2.checked ? `non-CO₂ \u00d7${DESNZ_2026.nonCo2Multiplier}` : "non-CO₂ off"}${factorsAreCustom(policy.factors) ? " \u00b7 custom factors" : ""}`
     : "";
 
   els.tableTitle.textContent = isFiltering() ? "Your shortlist, ranked by total flight emissions" : DEFAULT_TABLE_TITLE;
@@ -1006,7 +1006,7 @@ function renderMethod(policy) {
     <tr><th scope="row">Long-haul</th><td class="num">${formatGrams(f.longHaul.economy)}</td><td class="num">${formatGrams(f.longHaul.business)}</td></tr>`;
   els.methodNonCo2.textContent = els.nonCo2.checked
     ? `Multiplied by ${DESNZ_2026.nonCo2Multiplier}, DESNZ's central estimate for contrails, nitrogen oxides and water vapour. It is uncertain.`
-    : "Switched off, so only direct CO2 is counted. When on, CO2 is multiplied by 1.7 (DESNZ's central estimate, which is uncertain).";
+    : "Switched off, so only direct CO₂ is counted. When on, CO₂ is multiplied by 1.7 (DESNZ's central estimate, which is uncertain).";
   els.methodTrips.textContent = policy.returnTrip
     ? "Return journeys count both ways (\u00d72). Switch off Return trips for one-way figures."
     : "One-way journeys are counted. Switch on Return trips to count both ways (\u00d72).";

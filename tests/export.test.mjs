@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { AIRPORTS, DEFAULT_POLICY, SAMPLE_ROWS, assumptionLines, buildGroups, comparisonCsv, scoreAll } from "../src/model.js";
 
 const HEADER =
-  "Rank,City,Country,Airport,Total t CO2,Per person t CO2,Avg flight h,Avg jetlag h,Share with 6h+ jetlag %,Share in business class %";
+  "Rank,City,Country,Airport,Total t CO₂,Per person t CO₂,Avg flight h,Avg jetlag h,Share with 6h+ jetlag %,Share in business class %";
 
 const mk = (city, code, total, extra = {}) => ({
   destination: { city, code, country: extra.country ?? "Testland" },
@@ -70,7 +70,7 @@ test("assumptionLines describes the default policy", () => {
   assert.deepEqual(assumptionLines(DEFAULT_POLICY, { placedPeople: 101, placedGroups: 6, unplacedGroups: 0 }), [
     "Return journeys",
     "Business class over 6 hours",
-    "Non-CO2 uplift ×1.7",
+    "Non-CO₂ uplift ×1.7",
     "Factors: DESNZ 2026",
     "Distance +8%",
     "101 people in 6 groups placed; 0 groups not placed",
@@ -90,7 +90,7 @@ test("assumptionLines reflects one-way, no uplift, custom factors and singular c
   assert.deepEqual(out, [
     "One-way journeys",
     "Business class over 1 hour",
-    "Non-CO2 off",
+    "Non-CO₂ off",
     "Factors: custom",
     "Distance +8%",
     "1 person in 1 group placed; 1 group not placed",
